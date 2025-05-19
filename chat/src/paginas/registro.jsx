@@ -61,6 +61,7 @@ function Registro() {
             }
             else if (err.message === "error4") {
               setRespuesta3Server("El email ya está registrado")
+            }
           });
         } else {
           setRespuesta3Server(errorData.message || 'Error desconocido');
