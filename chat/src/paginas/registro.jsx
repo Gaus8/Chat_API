@@ -29,16 +29,17 @@ function Registro() {
     setRespuesta2Server("");
     setRespuesta3Server("");
     e.preventDefault();
-    if (!data.nombreCompleto || !data.email || !data.password || data.type) {
+    if (!data.nombreCompleto || !data.email || !data.password || !data.type) {
       alert('Todos los campos son obligatorios');
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/registro', data);
+      const response = await axios.post('http://localhost:3000/api/registro', data);
 
       if (response.status === 201) {
         localStorage.setItem('userEmail', data.email);
+        alert("Usuario Registrado con Exito")
         window.location.href = "/login";
       }
     } catch (err) {
@@ -94,6 +95,7 @@ function Registro() {
                   type="email"
                   placeholder="Correo"
                   id="email-registro"
+                  name="email"
                   value={data.email}
                   onChange={handleChange}
                   required
@@ -107,6 +109,7 @@ function Registro() {
                 <input
                   type="password"
                   placeholder="Contraseña"
+                  name="password"
                   id="password-registro"
                   value={data.password}
                   onChange={handleChange}
@@ -117,11 +120,27 @@ function Registro() {
               <div className="container-input-radio">
                 <div>
                   <label htmlFor="usuario-check">Usuario</label>
-                  <input type="radio" id="usuario-check" value="usuario" name="opcion-registro" required />
+                  <input
+                    type="radio"
+                    id="usuario-check"
+                    name="type"
+                    value="Usuario"
+                    onChange={handleChange}
+                    checked={data.type === "Usuario"}
+                    required
+                  />
                 </div>
                 <div>
                   <label htmlFor="empresa-check" value="empresa">Empresa</label>
-                  <input type="radio" id="empresa-check" name="opcion-registro" required />
+                  <input
+                    type="radio"
+                    id="empresa-check"
+                    name="type"
+                    value="Empresa"
+                    onChange={handleChange}
+                    checked={data.type === "Empresa"}
+                    required
+                  />
                 </div>
 
               </div>
