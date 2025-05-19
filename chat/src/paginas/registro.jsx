@@ -59,6 +59,8 @@ function Registro() {
                 "La contraseña debe tener al menos 8 caracteres e incluir: una letra mayúscula, una letra minúscula, un número y al menos uno de los siguientes caracteres especiales:.!@#$%^&*"
               );
             }
+            else if (err.message === "error4") {
+              setRespuesta3Server("El email ya está registrado")
           });
         } else {
           setRespuesta3Server(errorData.message || 'Error desconocido');
