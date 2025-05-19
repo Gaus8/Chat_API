@@ -163,25 +163,25 @@
 
 
 @media screen and (max-width:600px) {
-  .container {
+  .container-login-main {
     min-width: 70%;
     height: 70%;
     flex-direction: column-reverse;
   }
 
-  .form-container {
+  .container-login-form {
     height: 50%;
   }
 
-  .container-input {
+  .container-login-input {
     margin-top: 2px;
   }
 
-  .container-texto {
+  .container-login-texto {
     height: 50%;
   }
 
-  .container-texto img {
+  .container-login-texto img {
     width: 10%;
   }
 
@@ -193,26 +193,26 @@
 
 
 @media screen and (max-width:1000px) {
-  .container {
+  .container-login-main{
     max-width: 70%;
     max-height: 70%;
     flex-direction: column-reverse;
   }
 
-  .form-container {
+  .container-login-form {
     height: 50%;
   }
 
-  .container-input {
+  .container-login-input {
     margin-top: 2px;
     margin-bottom: 2px;
   }
 
-  .container-texto {
+  .container-login-texto {
     height: 50%;
   }
 
-  .container-texto img {
+  .container-login-texto img {
     width: 8%;
   }
 
@@ -224,26 +224,26 @@
 }
 
 @media screen and (max-width:1280px) {
-  .container {
+  .container-login-main {
     max-width: 40%;
     height: 70%;
     flex-direction: column-reverse;
   }
 
-  .form-container {
+  .container-login-form{
     height: 50%;
   }
 
-  .container-input {
+  .container-login-input {
     margin-top: 2px;
     margin-bottom: 2px;
   }
 
-  .container-texto {
+  .container-login-texto {
     height: 50%;
   }
 
-  .container-texto img {
+  .container-login-texto img {
     width: 8%;
   }
 
