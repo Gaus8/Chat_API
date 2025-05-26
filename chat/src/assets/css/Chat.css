@@ -1,189 +1,187 @@
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
-
-:root {
-    color-scheme: light dark;
-}
-
-body {
-    margin: 0;
-    font-family: system-ui;
-    height: 100vh;
-    background-image: url('/img/fondo.png'); 
-    background-size: cover;
-    background-position: center; 
-}
-
-.contenedor{
-  width: 100%;
-  height: 100%;
+/* Fondo general */
+.body-chat {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-image: url('/img/fondo.png');
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
   display: flex;
-  margin: auto;
-  justify-content: space-evenly;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.contenedor-chat{
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    height: 550px;
-    width: 300px;
-    position: relative;
-    background-color: rgba(255, 255, 255, 0.8);
+/* Contenedor principal */
+.contenedor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  gap: 20px;
 }
 
-#form {
-    position: absolute;
-    bottom: 0; 
-    right: 0;
-    left: 0;
-    display: flex;
-    padding: 10px;
-}
-
-#input {
-    border-radius: 5px;
-    border: 1px solid #eee;
-    width: 70%;
-    padding: 5px;
-    margin: auto;
-}
-
-#input:focus {
-    outline: 0;
-}
-
-#form button {
-    background: #09f;
-    color:#fff;
-    border:0;
-    padding: 5px;
-    width: 30%;
-    margin:4px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#form button:hover{
-    background: #0cf;
-}
-
-#titulo-chat {
-position: absolute;
-top: 50px;
-left: 40px;
-color: white;
-font-size: 48px;
-font-weight: bold;
-background-color: rgba(0,0,0,0.5);
-padding: 8px 12px;
-border-radius: 8px;
-}
-
-#subtitulo-chat {
-position: absolute;
-top: 150px; /* más abajo que el título */
-left: 115px;
-color: white;
-font-size: 20px;
-background-color: rgba(0,0,0,0.4);
-padding: 6px 10px;
-border-radius: 6px;
-}
-
-#piepagina-chat {
-left: 20px;
-font-size: 14px;
-margin-top: 40px;
-color: #888;
-}
-
-#ventajas-chat {
-position: absolute;
-top: 230px; /* más abajo que el título */
-left: 159px;
-color: white;
-font-size:18px;
-background-color: rgba(0,0,0,0.4);
-padding: 6px 10px;
-border-radius: 6px;
-}
-
-
-.video-intro {
-position: absolute;
-left: 160px;
-top: 455px; /* ajusta según donde quieras colocarlo */
-width: 50%;           /* Se ajusta al ancho del contenedor */
-max-width: 100px;      /* No sobrepasa este ancho */
-height: auto;          /* Mantiene proporciones */
-border-radius: 12px;   /* Opcional: bordes redondeados */
-}
-
-
-
-#videoModal {
-display: none;
-position: fixed;
-z-index: 999;
-left: 0;
-top: 0;
-width: 100vw;
-height: 100vh;
-background-color: rgba(0,0,0,0.8);
-justify-content: center;
-align-items: center;
-}
-
-#videoModal video {
-    width: 90%;
-    max-width: 400px;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-}
-
-#closeModal {
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    font-size: 36px;
-    color: white;
-    cursor: pointer;
-    background: none;
-    border: none;
-}
-
-#cuadro {
-width: 450px;           /* Ancho del cuadro */
-height: 295px;     
-background-color: rgba(0,0,0,0.4);
-padding: 6px 10px;
-border-radius: 6px;     /* Alto del cuadro */ /* Color del cuadro */
-position: absolute;     /* Permite mover el cuadro */
-top: 440px;             /* Distancia desde el borde superior */
-left: 115px;      
-z-index: 0;      /* Distancia desde el borde izquierdo */
-}
-
-#texto-video {
-position: absolute;
-top: 520px; /* más abajo que el título */
-left: 317px;
-color: white;
-font-size:18px;
-background-color: rgba(0,0,0,0.4);
-padding: 6px 10px;
-border-radius: 6px;
-z-index: 1;
+/* Sección de texto e imagen */
+.container-texto {
+  flex: 1 1 350px;
+  max-width: 500px;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
 }
 
 #imagen {
-position: absolute;
-top: 580px;   /* Mueve hacia abajo */
-left: 360px; /* Mueve hacia la derecha */
-width: 150px;
+  width: 50px;
+  margin-bottom: 10px;
 }
 
+h1 {
+    font-size: 20px;
+}
+#texto-video {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+#cuadro {
+  height: 10px;
+  background-color: #fff;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+
+#titulo-chat {
+  font-size: 24px;
+  margin-top: 10px;
+}
+
+#subtitulo-chat {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+#ventajas-chat {
+  font-size: 16px;
+}
+
+#ventajas-chat ul {
+  padding-left: 20px;
+}
+
+/* Video */
+.video-intro video {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 10px;
+  cursor: pointer;
+  align-items: center;
+}
+
+
+/* Modal de video */
+#videoModal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+
+#videoModal video {
+  width: 60%;
+  max-width: 300px;
+  border-radius: 12px;
+}
+
+
+#closeModal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 36px;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Contenedor del chat */
+.contenedor-chat {
+  flex: 1 1 350px;
+  max-width: 400px;
+  margin-top: 65px;
+  height: 500px;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+}
+
+/* Formulario de mensajes */
+#form {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+#input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+#form button {
+  background: #09f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#form button:hover {
+  background: #0cf;
+}
+
+/* Pie de página */
+#piepagina-chat {
+  text-align: center;
+  padding: 15px;
+  color: white;
+  background-color: rgba(0,0,0,0.5);
+}
+
+/* 🎯 Responsive design */
+@media (max-width: 600px) {
+  #titulo-chat {
+    font-size: 20px;
+  }
+
+  #subtitulo-chat,
+  #ventajas-chat {
+    font-size: 14px;
+  }
+
+  .contenedor-chat {
+    height: 400px;
+  }
+
+  #form {
+    flex-direction: column;
+  }
+
+  #form button {
+    width: 100%;
+  }
+}
