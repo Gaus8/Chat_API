@@ -1,7 +1,7 @@
 import {createBrowserRouter, RouterProvider} from "react-router-dom"
-import Login from "./paginas/Login"
+import Login from "./paginas/login"
 import Registro from "./paginas/registro"
-import Chat from "./paginas/chat"
+import Chat from "./paginas/Chat"
 function App() {
   const router = createBrowserRouter([
     {path:'/', element:<Registro />},
