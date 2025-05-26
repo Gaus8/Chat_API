@@ -4,7 +4,7 @@ import Token from '../assets/funciones/Token';
 import '../assets/css/Perfil.css';
 
 function Perfil() {
-  const usuario = Token({ ruta: 'perfil' });
+  const usuario = Token();
 
   // Estados para campos editables
   const [nombre, setNombre] = useState('');
@@ -26,7 +26,7 @@ function Perfil() {
     setMensaje(null);
     setError(null);
     try {
-      const res = await axios.put('http://localhost:3000/api/perfil', {
+      const res = await axios.patch('http://localhost:3000/api/perfil', {
         nombre,
         email,
       }, { withCredentials: true });

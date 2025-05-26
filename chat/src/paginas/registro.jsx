@@ -8,7 +8,7 @@ function Registro() {
 
 
   const [data, setData] = useState({
-    nombreCompleto: "",
+    nombre: "",
     email: "",
     password: "",
     type: ""
@@ -29,7 +29,7 @@ function Registro() {
     setRespuesta2Server("");
     setRespuesta3Server("");
     e.preventDefault();
-    if (!data.nombreCompleto || !data.email || !data.password || !data.type) {
+    if (!data.nombre || !data.email || !data.password || !data.type) {
       alert('Todos los campos son obligatorios');
       return;
     }
@@ -84,8 +84,8 @@ function Registro() {
                   type="text"
                   placeholder="Nombres y Apellidos"
                   id="nombres-registro"
-                  name="nombreCompleto"
-                  value={data.nombreCompleto}
+                  name="nombre"
+                  value={data.nombre}
                   onChange={handleChange}
                   required />
               </div>

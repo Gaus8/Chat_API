@@ -8,7 +8,7 @@
     color-scheme: light dark;
 }
 
-.body-chat {
+body {
     margin: 0;
     font-family: system-ui;
     height: 100vh;

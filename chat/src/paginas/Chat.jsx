@@ -1,10 +1,16 @@
 import '../assets/css/Chat.css';
 import Token from '../assets/funciones/Token';
+
 function Chat() {
-const usuario = Token({ruta:'chat'})
+  const usuario = Token()
   return (
     <>
       <div>
+        {usuario ? (
+          <h1>Hola {usuario.email}, bienvenido al chat</h1>
+        ) : (
+          <p>Cargando...</p>
+        )}
       </div>
       <div className="body-chat">
         <div className="contenedor">

@@ -4,7 +4,7 @@ import axios from 'axios';
 import Token from '../assets/funciones/Token';
 function MenuPrincipal() {
 
-    const usuario = Token({ruta:'main-page'})
+    const usuario = Token()
 
     const [openMenu, setOpenMenu] = useState(false);
 

@@ -2,22 +2,20 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-function Token({ ruta }) {
+export default function Token() {
     const [usuario, setUsuario] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/api/${ruta}`, { withCredentials: true })
+        axios.get(`http://localhost:3000/api/perfil`, { withCredentials: true })
             .then(res => {
                 setUsuario(res.data.usuario);
             })
-            .catch((error) => {
-                console.error("Error de autenticación:", error?.response?.data || error.message);
+            .catch(() => {
                 navigate('/login');
             });
-    }, [ruta, navigate]);
+    }, [navigate]);
 
     return usuario;
 }
 
-export default Token;
