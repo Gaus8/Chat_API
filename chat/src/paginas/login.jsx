@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { IoMailOutline, IoLockClosedOutline } from "react-icons/io5";
 import axios from "axios";
+
+
 function Login() {
   const [data, setData] = useState({
     email: "",
@@ -28,7 +30,7 @@ function Login() {
       });
 
       if (response.status === 200) {
-        window.location.href = "/chat";
+        window.location.href = "/main-page";
       }
     } catch (err) {
       const errorData = err.response?.data;

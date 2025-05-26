@@ -1,32 +1,10 @@
 import '../assets/css/Chat.css';
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-
+import Token from '../assets/funciones/Token';
 function Chat() {
-  const [usuario, setUsuario] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-  axios.get('http://localhost:3000/api/chat', { withCredentials: true })
-    .then(res => {
-      setUsuario(res.data.usuario); 
-    })
-    .catch((error) => {
-      console.log(error.response);
-      navigate('/login');
-    });
-}, [navigate]);
-
-
+const usuario = Token({ruta:'chat'})
   return (
     <>
       <div>
-        {usuario ? (
-          <h1>Hola {usuario.email}, bienvenido al chat</h1>
-        ) : (
-          <p>Cargando...</p>
-        )}
       </div>
       <div className="body-chat">
         <div className="contenedor">
