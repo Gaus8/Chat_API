@@ -1,8 +1,38 @@
+import { useEffect } from 'react';
 import '../assets/css/Chat.css';
 import Token from '../assets/funciones/Token';
 
 function Chat() {
-  const usuario = Token()
+  const usuario = Token();
+
+  useEffect(() => {
+    const videoIntro = document.getElementById('previewVideo');
+    const videoModal = document.getElementById('videoModal');
+    const closeModal = document.getElementById('closeModal');
+
+    if (videoIntro && videoModal && closeModal) {
+      videoIntro.addEventListener('click', () => {
+        videoModal.style.display = 'flex';
+        const modalVideo = videoModal.querySelector('video');
+        if (modalVideo) modalVideo.play();
+      });
+
+      closeModal.addEventListener('click', () => {
+        videoModal.style.display = 'none';
+        const modalVideo = videoModal.querySelector('video');
+        if (modalVideo) modalVideo.pause();
+      });
+
+      videoModal.addEventListener('click', (e) => {
+        if (e.target === videoModal) {
+          videoModal.style.display = 'none';
+          const modalVideo = videoModal.querySelector('video');
+          if (modalVideo) modalVideo.pause();
+        }
+      });
+    }
+  }, []);
+
   return (
     <>
       <div>
@@ -35,11 +65,13 @@ function Chat() {
                 <li>📱 Acceso desde cualquier navegador</li>
               </ul>
             </div>
+
             <div className="video-intro">
               <video id="previewVideo" muted>
                 <source src="videos/introchatapi.mp4" type="video/mp4" />
               </video>
             </div>
+
             <div id="videoModal">
               <button id="closeModal">✖</button>
               <video controls autoPlay>
@@ -47,6 +79,7 @@ function Chat() {
               </video>
             </div>
           </div>
+
           <div className="contenedor-chat">
             <section id="chat">
               <form id="form">
@@ -62,6 +95,7 @@ function Chat() {
             </section>
           </div>
         </div>
+
         <footer>
           <div id="piepagina-chat">© 2025 ChatAPI | Creado por FullHacks</div>
         </footer>
@@ -71,3 +105,5 @@ function Chat() {
 }
 
 export default Chat;
+
+
