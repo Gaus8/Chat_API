@@ -4,7 +4,7 @@ import axios from 'axios';
 import Token from '../assets/funciones/Token';
 function MenuPrincipal() {
 
-    const usuario = Token({ruta:'chat'})
+    const usuario = Token({ruta:'main-page'})
 
     const [openMenu, setOpenMenu] = useState(false);
 
@@ -20,8 +20,7 @@ function MenuPrincipal() {
             console.error("Error al cerrar sesión:", err);
         }
     };
-
-    return (
+   return (
         <header className="menu-header">
             <div className="logo-container">
                 <img src="img/flecha.png" alt="Logo" className="logo" />
@@ -29,27 +28,35 @@ function MenuPrincipal() {
             </div>
 
             <nav className="menu-nav">
-                <a href="/chat">Chat</a>
-                <a href="/perfil">Perfil</a>
-                <a href="/ayuda">Ayuda</a>
+                <a href="/chat">💬 Chat</a>
+                <a href="/perfil">👤 Perfil</a>
+                <a href="/ayuda">❓ Ayuda</a>
             </nav>
 
-            <div className="user-menu">
-                <button onClick={toggleMenu} className="user-button">
-                    👤   {usuario ? (
-                        <h1>{usuario.nombre} 📤</h1>
-                    ) : (
-                        <p>Cargando...</p>
-                    )}
+            <div className="actions">
+                <button className="notifications">
+                    🔔
+                    {/* Aquí podrías colocar un contador de notificaciones */}
                 </button>
-                {openMenu && (
-                    <div className="dropdown-menu">
-                        <button onClick={handleLogout}>Cerrar Sesión</button>
-                    </div>
-                )}
+
+                <div className="user-menu">
+                    <button onClick={toggleMenu} className="user-button">
+                        👤 {usuario ? (
+                            <span>{usuario.nombre} <span className="online-indicator" />📤</span>
+                        ) : (
+                            <span>Cargando...</span>
+                        )}
+                    </button>
+                    {openMenu && (
+                        <div className="dropdown-menu">
+                            <button onClick={handleLogout}>Cerrar Sesión</button>
+                        </div>
+                    )}
+                </div>
             </div>
         </header>
     );
+ 
 }
 
 export default MenuPrincipal;

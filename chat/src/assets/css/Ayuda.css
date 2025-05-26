@@ -1,0 +1,77 @@
+.ayuda-container {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.ayuda-hero {
+    text-align: center;
+    background-color: #2c3e50;
+    color: white;
+    padding: 30px 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.ayuda-icono {
+    font-size: 80px;
+    margin-bottom: 10px;
+}
+
+.faq-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #2c3e50;
+}
+
+.faq-item {
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.faq-item h3 {
+    margin-top: 0;
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.faq-icon {
+    font-size: 22px;
+    color: #007bff;
+}
+
+.faq-item p {
+    margin: 5px 0 0 32px; /* indentation under heading */
+}
+
+.ayuda-footer {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.ayuda-contacto {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.ayuda-contacto:hover {
+    background-color: #0056b3;
+}
