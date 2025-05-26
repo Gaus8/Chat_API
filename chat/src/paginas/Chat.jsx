@@ -37,7 +37,7 @@ function Chat() {
     <>
       <div>
         {usuario ? (
-          <h1>Hola {usuario.email}, bienvenido al chat</h1>
+          <h1>Hola {usuario.nombre}, bienvenido al chat</h1>
         ) : (
           <p>Cargando...</p>
         )}
