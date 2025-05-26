@@ -5,7 +5,7 @@ import Chat from "./paginas/Chat"
 import MenuPrincipal from "./paginas/MenuPrincipal"
 import Ayuda from "./paginas/Ayuda"
 import Perfil from "./paginas/Perfil"
-
+import Validacion from "./paginas/Validacion"
 function App() {
   const router = createBrowserRouter([
     {path:'/', element:<Registro />},
@@ -13,7 +13,8 @@ function App() {
     {path:'/chat', element:<Chat />},
     {path:'/main-page',element:<MenuPrincipal />},
     {path:'/ayuda',element:<Ayuda />},
-    {path:'/perfil',element:<Perfil />}
+    {path:'/perfil',element:<Perfil />},
+    {path:'/validacion', element:<Validacion />}
   ])
   return (
     <RouterProvider router={router} />

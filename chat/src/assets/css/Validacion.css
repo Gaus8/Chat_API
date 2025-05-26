@@ -1,0 +1,60 @@
+.body-validacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url('/img/background_img.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0.8;
+}
+
+.form-container-validacion {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(32, 20, 20, 0.311);
+  text-align: center;
+  width: 90%;
+  max-width: 500px;
+}
+
+.logo-empresa-validacion {
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+.input-verificacion-validacion {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+.button-validacion {
+  padding: 12px 24px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.button-validacion:hover {
+  background-color: #0056b3;
+}
+
+.mensaje-ok {
+  color: green;
+  margin-top: 15px;
+}
+
+.mensaje-error {
+  color: red;
+  margin-top: 15px;
+}
