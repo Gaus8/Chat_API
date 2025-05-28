@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../assets/css/Password.css'
+import '../assets/css/RecuperarPassword.css'
 import axios from 'axios';
 
 const RecuperarPassword = () => {
