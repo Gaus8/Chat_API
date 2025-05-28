@@ -76,7 +76,7 @@ function Login() {
                 <p id="error-login"></p>
               </div>
 
-              <a href="/recover_password">¿Olvidaste tu contraseña?</a>
+              <a href="/recuperar_password">¿Olvidaste tu contraseña?</a>
               <button
                 className="btn btn-login-principal"
                 id="boton-inicio-sesion"

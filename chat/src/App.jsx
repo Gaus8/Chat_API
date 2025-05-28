@@ -6,6 +6,8 @@ import MenuPrincipal from "./paginas/MenuPrincipal"
 import Ayuda from "./paginas/Ayuda"
 import Perfil from "./paginas/Perfil"
 import Validacion from "./paginas/Validacion"
+import RecuperarPassword from "./paginas/RecuperarPassword"
+
 function App() {
   const router = createBrowserRouter([
     {path:'/', element:<Registro />},
@@ -14,7 +16,8 @@ function App() {
     {path:'/main-page',element:<MenuPrincipal />},
     {path:'/ayuda',element:<Ayuda />},
     {path:'/perfil',element:<Perfil />},
-    {path:'/validacion', element:<Validacion />}
+    {path:'/validacion', element:<Validacion />},
+    {path:'/recuperar_password', element:<RecuperarPassword/>}
   ])
   return (
     <RouterProvider router={router} />
