@@ -1,6 +1,6 @@
 import {createBrowserRouter, RouterProvider} from "react-router-dom"
-import Login from "./paginas/login"
-import Registro from "./paginas/registro"
+import Login from "./paginas/Login"
+import Registro from "./paginas/Registro"
 import Chat from "./paginas/Chat"
 import MenuPrincipal from "./paginas/MenuPrincipal"
 import Ayuda from "./paginas/Ayuda"
