@@ -1,13 +1,13 @@
 import {createBrowserRouter, RouterProvider} from "react-router-dom"
-import Login from "./paginas/Login"
-import Registro from "./paginas/Registro"
+import Login from "./usuario/Login"
+import Registro from "./usuario/Registro"
 import Chat from "./paginas/Chat"
 import MenuPrincipal from "./paginas/MenuPrincipal"
 import Ayuda from "./paginas/Ayuda"
 import Perfil from "./paginas/Perfil"
-import Validacion from "./paginas/Validacion"
-import RecuperarPassword from "./paginas/RecuperarPassword"
-import RestablecerPassword from "./paginas/RestablecerPassword"
+import Validacion from "./usuario/Validacion"
+import RecuperarPassword from "./usuario/RecuperarPassword"
+import RestablecerPassword from "./usuario/RestablecerPassword"
 
 
 function App() {
@@ -19,8 +19,8 @@ function App() {
     {path:'/ayuda',element:<Ayuda />},
     {path:'/perfil',element:<Perfil />},
     {path:'/validacion', element:<Validacion />},
-    {path:'/recuperar_password', element:<RecuperarPassword/>},
-    {path:'/restablecer_password/:token', element:<RestablecerPassword/>},
+    {path:'/recuperar_password', element:<RecuperarPassword />},
+    {path:'/restablecer_password/:token', element:<RestablecerPassword />},
   ])
   return (
     <RouterProvider router={router} />
