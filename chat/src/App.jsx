@@ -16,14 +16,14 @@ function App() {
     {path:'/', element:<Registro />},
     {path:'/login', element:<Login />},
     {path:'/chat', element:<Chat />},
-    {path:'/main-page',element:<MenuPrincipal />},
+    {path:'/main_page',element:<MenuPrincipal />},
     {path:'/ayuda',element:<Ayuda />},
     {path:'/perfil',element:<Perfil />},
     {path:'/validacion', element:<Validacion />},
     {path:'/recuperar_password', element:<RecuperarPassword />},
     {path:'/restablecer_password/:token', element:<RestablecerPassword />},
     {path:'/chat_empresa', element:<ChatEmpresa />},
-    {path:'/menu_empresa', element:<MenuEmpresa />},
+    {path:'/main_empresa', element:<MenuEmpresa />},
 
   ])
   return (

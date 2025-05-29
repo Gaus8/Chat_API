@@ -39,7 +39,6 @@ function Registro() {
 
       if (response.status === 201) {
         localStorage.setItem('userEmail', data.email);
-        alert("Usuario Registrado con Exito")
         window.location.href = "/validacion";
       }
     } catch (err) {
