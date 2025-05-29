@@ -123,6 +123,35 @@ h1 {
   padding: 20px;
   position: relative;
 }
+.mensajes {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.mensaje {
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 15px;
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+.mensaje.mio {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.mensaje.otro {
+  background-color: #ffffff;
+  align-self: flex-start;
+  text-align: left;
+  border: 1px solid #e0e0e0;
+}
+
 
 /* Formulario de mensajes */
 #form {
