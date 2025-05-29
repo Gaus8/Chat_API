@@ -37,7 +37,7 @@ function Login() {
         if (usuario.rol === "Empresa") {
           window.location.href = "/main_empresa"; 
         } else {
-          window.location.href = "/chat";
+          window.location.href = "/main_page";
         }
       }
       
