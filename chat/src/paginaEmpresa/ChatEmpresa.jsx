@@ -3,7 +3,7 @@ import '../assets/css/Chat.css';
 import Token from '../assets/funciones/Token';
 import { io } from 'socket.io-client';
 
-function Chat() {
+function ChatEmpresa() {
   const usuario = Token();
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -154,4 +154,4 @@ function Chat() {
   );
 }
 
-export default Chat;
+export default ChatEmpresa;
