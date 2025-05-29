@@ -30,8 +30,17 @@ function Login() {
       });
 
       if (response.status === 200) {
-        window.location.href = "/main-page";
+        const usuario = response.data.usuario; 
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+
+        // Redirigir según el rol
+        if (usuario.rol === "Empresa") {
+          window.location.href = "/ChatEmpresa"; 
+        } else {
+          window.location.href = "/Chat";
+        }
       }
+      
     } catch (err) {
       const errorData = err.response?.data;
       console.log(errorData)

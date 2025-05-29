@@ -55,9 +55,11 @@ function Chat() {
     e.preventDefault();
     if (inputMessage.trim() && socket) {
       socket.emit('chat message', {
-        nombre: usuario?.nombre || "Anónimo",
-        mensaje: inputMessage,
-      });
+      nombre: usuario?.nombre || "Anónimo",
+      mensaje: inputMessage,
+      rol: usuario?.rol || "Usuario"
+    });
+
       setInputMessage('');
     }
   };
@@ -125,11 +127,21 @@ function Chat() {
               </form>
               <div className="mensajes">
                 {messages.map((msg, index) => (
-                  <div key={index} className="mensaje">
-                    <strong>{msg.nombre}:</strong> {msg.mensaje}
+                  <div
+                    key={index}
+                    className={`mensaje-burbuja ${
+                      msg.rol === usuario?.type ? 'derecha' : 'izquierda'
+                    }`}
+                  >
+                    <div className="mensaje-nombre">
+                      <strong>{msg.nombre}</strong>
+                    </div>
+                    <div className="mensaje-texto">{msg.mensaje}</div>
                   </div>
                 ))}
               </div>
+
+
             </section>
           </div>
         </div>

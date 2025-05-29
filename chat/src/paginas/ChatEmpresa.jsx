@@ -1,11 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import '../assets/css/Chat.css';
 import Token from '../assets/funciones/Token';
+import { io } from 'socket.io-client';
 
 function Chat() {
   const usuario = Token();
+  const [socket, setSocket] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
 
   useEffect(() => {
+    // Conectar con el servidor Socket.IO
+    const newSocket = io('http://localhost:3000');
+    setSocket(newSocket);
+
+    // Recibir mensajes
+    newSocket.on('chat message', (msg) => {
+      setMessages((prevMessages) => [...prevMessages, msg]);
+    });
+
+    // Obtener referencias de video una vez que el DOM esté listo
     const videoIntro = document.getElementById('previewVideo');
     const videoModal = document.getElementById('videoModal');
     const closeModal = document.getElementById('closeModal');
@@ -31,7 +45,24 @@ function Chat() {
         }
       });
     }
+
+    return () => {
+      newSocket.close();
+    };
   }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputMessage.trim() && socket) {
+      socket.emit('chat message', {
+      nombre: usuario?.nombre || "Anónimo",
+      mensaje: inputMessage,
+      rol: usuario?.rol || "Empresa"
+    });
+
+      setInputMessage('');
+    }
+  };
 
   return (
     <>
@@ -82,16 +113,35 @@ function Chat() {
 
           <div className="contenedor-chat">
             <section id="chat">
-              <form id="form">
+              <form id="form" onSubmit={handleSubmit}>
                 <input
                   type="text"
                   name="message"
                   id="input"
                   placeholder="Escribe tu mensaje"
                   autoComplete="off"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
                 />
                 <button type="submit">📤 Enviar</button>
               </form>
+              <div className="mensajes">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`mensaje-burbuja ${
+                      msg.rol === usuario?.type ? 'derecha' : 'izquierda'
+                    }`}
+                  >
+                    <div className="mensaje-nombre">
+                      <strong>{msg.nombre}</strong>
+                    </div>
+                    <div className="mensaje-texto">{msg.mensaje}</div>
+                  </div>
+                ))}
+              </div>
+
+
             </section>
           </div>
         </div>
@@ -105,5 +155,3 @@ function Chat() {
 }
 
 export default Chat;
-
-

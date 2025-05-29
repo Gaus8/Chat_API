@@ -123,33 +123,50 @@ h1 {
   padding: 20px;
   position: relative;
 }
+
 .mensajes {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  max-height: 300px;
   overflow-y: auto;
+  max-height: 400px;
 }
 
-.mensaje {
-  padding: 8px 12px;
-  margin: 5px;
-  border-radius: 15px;
+.mensaje-burbuja {
   max-width: 60%;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 15px;
   word-wrap: break-word;
+  display: inline-block;
 }
 
-.mensaje.mio {
-  background-color: #dcf8c6;
-  align-self: flex-end;
-  text-align: right;
+.mensaje-nombre {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
 }
 
-.mensaje.otro {
-  background-color: #ffffff;
+.mensaje-texto {
+  font-size: 1rem;
+}
+
+/* Mensajes del cliente: a la izquierda */
+.izquierda {
+  background-color: #e6f3ff; /* azul claro */
   align-self: flex-start;
   text-align: left;
-  border: 1px solid #e0e0e0;
+  color: #003366;
+  border: 1px solid #b3d9ff;
+}
+
+/* Mensajes de la empresa: a la derecha */
+.derecha {
+  background-color: #003366; /* azul oscuro empresa */
+  align-self: flex-end;
+  text-align: right;
+  color: #ffffff;
+  border: 1px solid #001f4d;
 }
 
 
