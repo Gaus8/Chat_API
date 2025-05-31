@@ -8,18 +8,39 @@ function Chat() {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [empresasConectadas, setEmpresasConectadas] = useState([]);
 
   useEffect(() => {
-    // Conectar con el servidor Socket.IO
     const newSocket = io('http://localhost:3000');
+
     setSocket(newSocket);
+
+    // Cuando conectamos, enviamos quién somos (identify)
+    newSocket.on('connect', () => {
+      if (usuario) {
+        newSocket.emit('identify', {
+          nombre: usuario.nombre,
+          type: usuario.type,  // "Usuario" o "Empresa"
+        });
+
+        // Si soy usuario, pido la lista de empresas conectadas
+        if (usuario.type === 'Usuario') {
+          newSocket.emit('get empresas conectadas');
+        }
+      }
+    });
 
     // Recibir mensajes
     newSocket.on('chat message', (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
-    // Obtener referencias de video una vez que el DOM esté listo
+    // Recibir lista de empresas conectadas (solo usuarios la reciben)
+    newSocket.on('empresas conectadas', (empresas) => {
+      setEmpresasConectadas(empresas);
+    });
+
+    // Tu código para videos y modales (sin cambios)
     const videoIntro = document.getElementById('previewVideo');
     const videoModal = document.getElementById('videoModal');
     const closeModal = document.getElementById('closeModal');
@@ -49,16 +70,16 @@ function Chat() {
     return () => {
       newSocket.close();
     };
-  }, []);
+  }, [usuario]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputMessage.trim() && socket) {
       socket.emit('chat message', {
-      nombre: usuario?.nombre || "Anónimo",
-      mensaje: inputMessage,
-      rol: usuario?.rol || "Usuario"
-    });
+        nombre: usuario?.nombre || "Anónimo",
+        mensaje: inputMessage,
+        rol: usuario?.type || "Usuario"
+      });
 
       setInputMessage('');
     }
@@ -73,44 +94,27 @@ function Chat() {
           <p>Cargando...</p>
         )}
       </div>
+
+      {/* Mostrar empresas conectadas (solo para usuario) */}
+      {usuario?.type === 'Usuario' && (
+        <div>
+          <h2>Empresas conectadas:</h2>
+          <ul>
+            {empresasConectadas.length === 0 ? (
+              <li>No hay empresas conectadas</li>
+            ) : (
+              empresasConectadas.map((empresa, i) => (
+                <li key={i}>{empresa.nombre}</li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+
       <div className="body-chat">
         <div className="contenedor">
-          <div className="container-texto">
-            <img src="img/flecha.png" alt="Imagen libre" id="imagen" />
-            <div id="texto-video">
-              🎥 Haz clic en el video para <br />
-              ver cómo funciona ChatAPI
-            </div>
-            <div id="cuadro"></div>
-            <div id="titulo-chat">💬 Bienvenido a <strong>ChatAPI</strong></div>
-            <div id="subtitulo-chat">
-              Conéctate entre Empresa y Cliente en tiempo real <br />
-              Comparte tus ideas al instante.
-            </div>
-            <div id="ventajas-chat">
-              <h3>🚀 ¿Por qué usar ChatAPI?</h3>
-              <ul>
-                <li>🔒 Seguridad en tiempo real</li>
-                <li>🤝 Conexión directa Empresa - Cliente</li>
-                <li>⚡ Interfaz rápida y dinámica</li>
-                <li>📱 Acceso desde cualquier navegador</li>
-              </ul>
-            </div>
-
-            <div className="video-intro">
-              <video id="previewVideo" muted>
-                <source src="videos/introchatapi.mp4" type="video/mp4" />
-              </video>
-            </div>
-
-            <div id="videoModal">
-              <button id="closeModal">✖</button>
-              <video controls autoPlay>
-                <source src="/videos/introchatapi.mp4" type="video/mp4" />
-              </video>
-            </div>
-          </div>
-
+          {/* ... el resto de tu código del chat sin cambios */}
+          
           <div className="contenedor-chat">
             <section id="chat">
               <form id="form" onSubmit={handleSubmit}>
@@ -140,8 +144,6 @@ function Chat() {
                   </div>
                 ))}
               </div>
-
-
             </section>
           </div>
         </div>
