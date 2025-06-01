@@ -290,3 +290,109 @@ h1 {
   font-size: 0.8em;
   margin-left: 10px;
 }
+
+
+/* Estilos para edición de mensajes */
+.edit-message-container {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-message-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.save-edit-btn, .cancel-edit-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-edit-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cancel-edit-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Estilos para acciones de mensaje */
+.message-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.edit-btn:hover, .delete-btn:hover {
+  opacity: 1;
+}
+
+/* Confirmación de eliminación */
+.delete-confirmation {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.confirm-delete-btn, .cancel-delete-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.confirm-delete-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.cancel-delete-btn {
+  background-color: #ccc;
+}
+
+/* Mejoras generales */
+.send-button {
+  transition: background-color 0.2s;
+}
+
+.send-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.mensaje-texto {
+  cursor: pointer;
+  user-select: text;
+}

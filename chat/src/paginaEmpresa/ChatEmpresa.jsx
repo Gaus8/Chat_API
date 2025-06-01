@@ -15,16 +15,17 @@ function Chat() {
   const [newChatModal, setNewChatModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [onlineStatus, setOnlineStatus] = useState({});
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editingMessageContent, setEditingMessageContent] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
   const filteredClients = clients.filter(client =>
     client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Establecer conexión socket cuando el usuario está disponible
   useEffect(() => {
     if (!usuario) return;
-
     const newSocket = io('http://localhost:3000');
     setSocket(newSocket);
 
@@ -41,7 +42,6 @@ function Chat() {
         statusMap[user.id] = user.conectado;
       });
       setOnlineStatus(statusMap);
-
       setClients(prevClients =>
         prevClients.map(client => ({
           ...client,
@@ -55,7 +55,6 @@ function Chat() {
     };
   }, [usuario]);
 
-  // Escuchar mensajes nuevos solo cuando el socket y un cliente estén activos
   useEffect(() => {
     if (!socket || !selectedClient) return;
 
@@ -64,72 +63,53 @@ function Chat() {
         (msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
         (msg.remitente === selectedClient.id && msg.destinatario === usuario.id)
       ) {
-        setMessages(prevMessages => [
-          ...prevMessages,
-          {
-            ...msg,
-            isOwn: msg.remitente === usuario.id,
-          },
-        ]);
+        setMessages(prev => [...prev, { ...msg, isOwn: msg.remitente === usuario.id }]);
       }
     };
 
     socket.on('new chat', handleNewMessage);
-
-    return () => {
-      socket.off('new chat', handleNewMessage);
-    };
+    return () => socket.off('new chat', handleNewMessage);
   }, [socket, selectedClient, usuario]);
 
-  // Obtener clientes
   useEffect(() => {
     if (!usuario) return;
-
     const fetchClients = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/usuarios');
-        if (response.status === 200) {
-          const clientes = response.data?.usuarios || [];
-          setClients(clientes);
-        }
+        const res = await axios.get('http://localhost:3000/api/usuarios');
+        setClients(res.data?.usuarios || []);
       } catch (err) {
         console.error('Error al cargar clientes:', err);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchClients();
   }, [usuario]);
 
   useEffect(() => {
     if (!selectedClient || !usuario) return;
-
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/mensajes/${usuario.id}/${selectedClient.id}`);
-        if (response.status === 200) {
-          // Suponiendo que la respuesta viene como { mensajes: [...] }
-          const mensajesBD = response.data.mensajes.map(msg => ({
-            ...msg,
-            isOwn: msg.remitente === usuario.id,
-          }));
-          setMessages(mensajesBD);
-        }
-      } catch (error) {
-        console.error('Error al cargar mensajes:', error);
+        const res = await axios.get(`http://localhost:3000/api/mensajes/${usuario.id}/${selectedClient.id}`);
+        const mensajesBD = res.data.mensajes.map(msg => ({
+          ...msg,
+          id: msg._id,
+          isOwn: msg.remitente === usuario.id,
+        }));
+        setMessages(mensajesBD);
+      } catch (err) {
+        console.error('Error al cargar mensajes:', err);
       }
     };
-
     fetchMessages();
   }, [selectedClient, usuario]);
-
-
 
   const startNewChat = (client) => {
     setSelectedClient(client);
     setMessages([]);
     setNewChatModal(false);
+    setEditingMessageId(null);
+    setShowDeleteConfirm(null);
   };
 
   const handleSubmit = (e) => {
@@ -141,19 +121,57 @@ function Chat() {
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
       };
-
       socket.emit('new chat', messageData);
-
-      setMessages(prevMessages => [
-        ...prevMessages,
-        {
-          ...messageData,
-          isOwn: true,
-        },
-      ]);
-
+      setMessages(prev => [...prev, { ...messageData, isOwn: true }]);
       setInputMessage('');
     }
+  };
+
+  const handleEdit = (msg) => {
+    setEditingMessageId(msg.id);
+    setEditingMessageContent(msg.mensaje);
+    setShowDeleteConfirm(null); // Cierra cualquier confirmación de eliminación abierta
+  };
+
+  const saveEdit = async (msgId) => {
+  try {
+      await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, { 
+        mensaje: editingMessageContent 
+      });
+      
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === msgId ? { ...msg, mensaje: editingMessageContent } : msg
+        )
+      );
+      setEditingMessageId(null);
+      setEditingMessageContent('');
+    } catch (err) {
+      console.error('Error al editar mensaje:', err);
+    }
+
+    
+  };
+
+  const cancelEdit = () => {
+    setEditingMessageId(null);
+    setEditingMessageContent('');
+  setShowDeleteConfirm(null);
+  };
+
+  const handleDelete = async (msgId) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/mensajes/${msgId}`);
+      setMessages(prev => prev.filter(msg => msg.id !== msgId));
+      setShowDeleteConfirm(null);
+    } catch (err) {
+      console.error('Error al eliminar mensaje:', err);
+    }
+  };
+
+  const toggleDeleteConfirm = (msgId) => {
+    setShowDeleteConfirm(showDeleteConfirm === msgId ? null : msgId);
+    setEditingMessageId(null); // Cierra cualquier edición abierta
   };
 
   if (!usuario) {
@@ -162,19 +180,21 @@ function Chat() {
 
   return (
     <div className="chat-empresarial">
-      {/* Header */}
       <header className="chat-header">
         <h1>Chat Empresarial - {usuario.nombre}</h1>
         <p>Conecta con tus clientes en tiempo real</p>
       </header>
 
-      {/* Chat Container */}
       <div className="chat-container">
-        {/* Panel de Contactos */}
         <div className="contacts-panel">
           <div className="contacts-header">
             <h2>Clientes</h2>
-            <button className="new-chat-btn" onClick={() => setNewChatModal(true)}>+ Nuevo chat</button>
+            <button 
+              onClick={() => setNewChatModal(true)}
+              className="new-chat-btn"
+            >
+              <span>+</span> Nuevo chat
+            </button>
           </div>
 
           <div className="contacts-list">
@@ -191,7 +211,7 @@ function Chat() {
                   <div className="contact-info">
                     <h3>
                       {client.nombre}
-                      <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`} title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}></span>
+                      <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}></span>
                     </h3>
                     <p>{client.email}</p>
                   </div>
@@ -201,7 +221,6 @@ function Chat() {
           </div>
         </div>
 
-        {/* Área del Chat */}
         <div className="chat-area">
           {selectedClient ? (
             <>
@@ -211,7 +230,7 @@ function Chat() {
                   <div>
                     <h2>
                       {selectedClient.nombre}
-                      <span className={`status-indicator ${onlineStatus[selectedClient.id] ? 'online' : 'offline'}`} title={onlineStatus[selectedClient.id] ? 'En línea' : 'Desconectado'}></span>
+                      <span className={`status-indicator ${onlineStatus[selectedClient.id] ? 'online' : 'offline'}`}></span>
                     </h2>
                     <p>{selectedClient.email}</p>
                   </div>
@@ -220,18 +239,89 @@ function Chat() {
 
               <div className="messages-container">
                 {messages.length === 0 ? (
-                  <div className="empty-chat"><p>Inicia una conversación con {selectedClient.nombre}</p></div>
+                  <div className="empty-chat">
+                    <p>Inicia una conversación con {selectedClient.nombre}</p>
+                  </div>
                 ) : (
                   messages.map((msg, index) => (
                     <div key={index} className={`message ${msg.isOwn ? 'sent' : 'received'}`}>
                       <div className="message-content">
-                        <p>{msg.mensaje}</p>
-                        <span className="message-time">
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
+                        {editingMessageId === msg.id ? (
+                          <div className="edit-message-container">
+                            <input
+                              type="text"
+                              value={editingMessageContent}
+                              onChange={(e) => setEditingMessageContent(e.target.value)}
+                              className="edit-message-input"
+                              autoFocus
+                            />
+                            <div className="edit-actions">
+                              <button 
+                                onClick={() => saveEdit(msg.id)}
+                                className="save-edit-btn"
+                              >
+                                Guardar
+                              </button>
+                              <button 
+                                onClick={cancelEdit}
+                                className="cancel-edit-btn"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="message-text" onDoubleClick={() => msg.isOwn && handleEdit(msg)}>
+                              {msg.mensaje}
+                            </div>
+                            <div className="message-footer">
+                              <span className="message-time">
+                                {new Date(msg.timestamp).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                              {msg.isOwn && (
+                                <div className="message-actions">
+                                  <button 
+                                    onClick={() => handleEdit(msg)}
+                                    className="edit-btn"
+                                    title="Editar mensaje"
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button 
+                                    onClick={() => toggleDeleteConfirm(msg.id)}
+                                    className="delete-btn"
+                                    title="Eliminar mensaje"
+                                  >
+                                    
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            {showDeleteConfirm === msg.id && (
+                              <div className="delete-confirmation">
+                                <p>¿Eliminar este mensaje?</p>
+                                <div className="confirmation-buttons">
+                                  <button 
+                                    onClick={() => handleDelete(msg.id)}
+                                    className="confirm-delete-btn"
+                                  >
+                                    Sí
+                                  </button>
+                                  <button 
+                                    onClick={() => setShowDeleteConfirm(null)}
+                                    className="cancel-delete-btn"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   ))
@@ -244,26 +334,39 @@ function Chat() {
                   placeholder="Escribe tu mensaje..."
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
+                  className="message-input"
                 />
-                <button type="submit">Enviar</button>
+                <button type="submit" className="send-btn">
+                  Enviar
+                </button>
               </form>
             </>
           ) : (
             <div className="no-chat-selected">
               <h2>Selecciona un cliente para chatear</h2>
               <p>O inicia una nueva conversación</p>
+              <button 
+                onClick={() => setNewChatModal(true)}
+                className="start-chat-btn"
+              >
+                Iniciar nuevo chat
+              </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal para nuevo chat */}
       {newChatModal && (
         <div className="modal-overlay">
           <div className="new-chat-modal">
             <div className="modal-header">
               <h2>Nuevo chat</h2>
-              <button onClick={() => setNewChatModal(false)}>×</button>
+              <button 
+                onClick={() => setNewChatModal(false)}
+                className="close-modal-btn"
+              >
+                ×
+              </button>
             </div>
             <div className="search-box">
               <input
@@ -271,24 +374,29 @@ function Chat() {
                 placeholder="Buscar cliente..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
               />
             </div>
             <div className="client-list">
               {filteredClients.length > 0 ? (
                 filteredClients.map((client) => (
-                  <div key={client.id} className="client-item" onClick={() => startNewChat(client)}>
+                  <div 
+                    key={client.id} 
+                    className="client-item" 
+                    onClick={() => startNewChat(client)}
+                  >
                     <div className="client-avatar">{client.nombre.charAt(0)}</div>
                     <div className="client-details">
                       <h3>
                         {client.nombre}
-                        <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`} title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}></span>
+                        <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}></span>
                       </h3>
                       <p>{client.email}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p>No se encontraron clientes</p>
+                <p className="no-clients-found">No se encontraron clientes</p>
               )}
             </div>
           </div>
