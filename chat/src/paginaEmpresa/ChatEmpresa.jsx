@@ -21,6 +21,7 @@ function Chat() {
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Establecer conexión socket cuando el usuario está disponible
   useEffect(() => {
     if (!usuario) return;
 
@@ -41,19 +42,27 @@ function Chat() {
       });
       setOnlineStatus(statusMap);
 
-      setClients(prevClients => 
+      setClients(prevClients =>
         prevClients.map(client => ({
           ...client,
-          conectado: statusMap[client.id] || false
+          conectado: statusMap[client.id] || false,
         }))
       );
     });
 
-    newSocket.on('new chat', (msg) => {
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [usuario]);
+
+  // Escuchar mensajes nuevos solo cuando el socket y un cliente estén activos
+  useEffect(() => {
+    if (!socket || !selectedClient) return;
+
+    const handleNewMessage = (msg) => {
       if (
-        selectedClient &&
-        ((msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
-          (msg.remitente === selectedClient.id && msg.destinatario === usuario.id))
+        (msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
+        (msg.remitente === selectedClient.id && msg.destinatario === usuario.id)
       ) {
         setMessages(prevMessages => [
           ...prevMessages,
@@ -63,7 +72,18 @@ function Chat() {
           },
         ]);
       }
-    });
+    };
+
+    socket.on('new chat', handleNewMessage);
+
+    return () => {
+      socket.off('new chat', handleNewMessage);
+    };
+  }, [socket, selectedClient, usuario]);
+
+  // Obtener clientes
+  useEffect(() => {
+    if (!usuario) return;
 
     const fetchClients = async () => {
       try {
@@ -73,18 +93,14 @@ function Chat() {
           setClients(clientes);
         }
       } catch (err) {
-        console.log(err);
+        console.error('Error al cargar clientes:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchClients();
-
-    return () => {
-      newSocket.close();
-    };
-  }, [usuario, selectedClient]);
+  }, [usuario]);
 
   const startNewChat = (client) => {
     setSelectedClient(client);
@@ -122,21 +138,19 @@ function Chat() {
 
   return (
     <div className="chat-empresarial">
+      {/* Header */}
       <header className="chat-header">
         <h1>Chat Empresarial - {usuario.nombre}</h1>
         <p>Conecta con tus clientes en tiempo real</p>
       </header>
 
+      {/* Chat Container */}
       <div className="chat-container">
+        {/* Panel de Contactos */}
         <div className="contacts-panel">
           <div className="contacts-header">
             <h2>Clientes</h2>
-            <button
-              className="new-chat-btn"
-              onClick={() => setNewChatModal(true)}
-            >
-              + Nuevo chat
-            </button>
+            <button className="new-chat-btn" onClick={() => setNewChatModal(true)}>+ Nuevo chat</button>
           </div>
 
           <div className="contacts-list">
@@ -153,10 +167,7 @@ function Chat() {
                   <div className="contact-info">
                     <h3>
                       {client.nombre}
-                      <span 
-                        className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}
-                        title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}
-                      ></span>
+                      <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`} title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}></span>
                     </h3>
                     <p>{client.email}</p>
                   </div>
@@ -166,6 +177,7 @@ function Chat() {
           </div>
         </div>
 
+        {/* Área del Chat */}
         <div className="chat-area">
           {selectedClient ? (
             <>
@@ -175,10 +187,7 @@ function Chat() {
                   <div>
                     <h2>
                       {selectedClient.nombre}
-                      <span 
-                        className={`status-indicator ${onlineStatus[selectedClient.id] ? 'online' : 'offline'}`}
-                        title={onlineStatus[selectedClient.id] ? 'En línea' : 'Desconectado'}
-                      ></span>
+                      <span className={`status-indicator ${onlineStatus[selectedClient.id] ? 'online' : 'offline'}`} title={onlineStatus[selectedClient.id] ? 'En línea' : 'Desconectado'}></span>
                     </h2>
                     <p>{selectedClient.email}</p>
                   </div>
@@ -187,15 +196,10 @@ function Chat() {
 
               <div className="messages-container">
                 {messages.length === 0 ? (
-                  <div className="empty-chat">
-                    <p>Inicia una conversación con {selectedClient.nombre}</p>
-                  </div>
+                  <div className="empty-chat"><p>Inicia una conversación con {selectedClient.nombre}</p></div>
                 ) : (
                   messages.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`message ${msg.isOwn ? 'sent' : 'received'}`}
-                    >
+                    <div key={index} className={`message ${msg.isOwn ? 'sent' : 'received'}`}>
                       <div className="message-content">
                         <p>{msg.mensaje}</p>
                         <span className="message-time">
@@ -229,6 +233,7 @@ function Chat() {
         </div>
       </div>
 
+      {/* Modal para nuevo chat */}
       {newChatModal && (
         <div className="modal-overlay">
           <div className="new-chat-modal">
@@ -247,19 +252,12 @@ function Chat() {
             <div className="client-list">
               {filteredClients.length > 0 ? (
                 filteredClients.map((client) => (
-                  <div
-                    key={client.id}
-                    className="client-item"
-                    onClick={() => startNewChat(client)}
-                  >
+                  <div key={client.id} className="client-item" onClick={() => startNewChat(client)}>
                     <div className="client-avatar">{client.nombre.charAt(0)}</div>
                     <div className="client-details">
                       <h3>
                         {client.nombre}
-                        <span 
-                          className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}
-                          title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}
-                        ></span>
+                        <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`} title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}></span>
                       </h3>
                       <p>{client.email}</p>
                     </div>
