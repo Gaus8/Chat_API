@@ -3,19 +3,20 @@ import '../assets/css/Chat.css';
 import Token from '../assets/funciones/Token';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+
 function Chat() {
   const usuario = Token();
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [empresaId, setEmpresaId] = useState('');
- const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [nombreEmpresa, setNombreEmpresa] = useState('');
 
+  // Crear y conectar socket solo cuando cambia usuario
   useEffect(() => {
     if (!usuario) return;
 
     const newSocket = io('http://localhost:3000');
-    setSocket(newSocket);
 
     newSocket.on('connect', () => {
       newSocket.emit('identify', {
@@ -24,29 +25,62 @@ function Chat() {
       });
     });
 
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [usuario]);
+
+  // Cargar lista de empresas solo cuando cambia usuario
+  useEffect(() => {
+    if (!usuario) return;
+
     const fetchClients = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/empresas');
         if (response.status === 200) {
-          const empresas = response.data?.empresas
+          const empresas = response.data?.empresas;
           if (empresas.length > 0) {
             setEmpresaId(empresas[0].id);
             setNombreEmpresa(empresas[0].nombre);
-             // o la que quieras usar
           }
         }
-    
-      }
-      catch (err) {
-        console.log(err)
+      } catch (err) {
+        console.log(err);
       }
     };
 
     fetchClients();
+  }, [usuario]);
 
+  // Cargar mensajes cuando cambia empresaId o usuario
+  useEffect(() => {
+    if (!empresaId || !usuario) return;
 
-    newSocket.on("new chat", (msg) => {
-      // Solo mostrar el mensaje si es del cliente seleccionado o si eres tú
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/mensajes/${empresaId}/${usuario.id}`);
+        if (response.status === 200) {
+          const mensajesBD = response.data.mensajes.map(msg => ({
+            ...msg,
+            isOwn: msg.remitente === usuario.id,
+          }));
+          setMessages(mensajesBD);
+        }
+      } catch (error) {
+        console.error('Error al cargar mensajes:', error);
+      }
+    };
+
+    fetchMessages();
+  }, [empresaId, usuario]);
+
+  // Escuchar mensajes nuevos desde socket
+  useEffect(() => {
+    if (!socket || !usuario) return;
+
+    const handleNewChat = (msg) => {
       if (
         (msg.remitente === usuario.id && msg.destinatario === empresaId) ||
         (msg.remitente === empresaId && msg.destinatario === usuario.id)
@@ -59,14 +93,14 @@ function Chat() {
           },
         ]);
       }
+    };
 
-    });
-
+    socket.on('new chat', handleNewChat);
 
     return () => {
-      newSocket.close();
+      socket.off('new chat', handleNewChat);
     };
-  }, [usuario, empresaId]);
+  }, [socket, usuario, empresaId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -78,16 +112,16 @@ function Chat() {
         timestamp: new Date().toISOString(),
       };
 
-
-      setMessages((prevMessages) => [...prevMessages, {
-        ...messageData,
-        isOwn: true
-      }]);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          ...messageData,
+          isOwn: true,
+        },
+      ]);
       socket.emit('new chat', messageData);
       setInputMessage('');
     }
-
-
   };
 
   return (
@@ -121,15 +155,17 @@ function Chat() {
                 {messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`mensaje-burbuja ${msg.remitente === usuario.id ? 'derecha' : 'izquierda'
-                      }`}
+                    className={`mensaje-burbuja ${
+                      msg.isOwn ? 'derecha' : 'izquierda'
+                    }`}
                   >
                     <div className="mensaje-nombre">
-                      <strong>
-                        {msg.remitente === usuario.id ? 'Tú' : nombreEmpresa}
-                      </strong>
+                      <strong>{msg.isOwn ? 'Tú' : nombreEmpresa}</strong>
                       <span className="mensaje-hora">
-                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </span>
                     </div>
                     <div className="mensaje-texto">{msg.mensaje}</div>

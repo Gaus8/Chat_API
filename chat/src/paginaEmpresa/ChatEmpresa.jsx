@@ -102,6 +102,30 @@ function Chat() {
     fetchClients();
   }, [usuario]);
 
+  useEffect(() => {
+    if (!selectedClient || !usuario) return;
+
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/mensajes/${usuario.id}/${selectedClient.id}`);
+        if (response.status === 200) {
+          // Suponiendo que la respuesta viene como { mensajes: [...] }
+          const mensajesBD = response.data.mensajes.map(msg => ({
+            ...msg,
+            isOwn: msg.remitente === usuario.id,
+          }));
+          setMessages(mensajesBD);
+        }
+      } catch (error) {
+        console.error('Error al cargar mensajes:', error);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedClient, usuario]);
+
+
+
   const startNewChat = (client) => {
     setSelectedClient(client);
     setMessages([]);
