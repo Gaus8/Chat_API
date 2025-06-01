@@ -14,6 +14,12 @@ function Chat() {
   const [isLoading, setIsLoading] = useState(true);
   const [newChatModal, setNewChatModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [onlineStatus, setOnlineStatus] = useState({});
+
+  const filteredClients = clients.filter(client =>
+    client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     if (!usuario) return;
@@ -28,14 +34,28 @@ function Chat() {
       });
     });
 
+    newSocket.on('usuarios conectados', (usuariosConectados) => {
+      const statusMap = {};
+      usuariosConectados.forEach(user => {
+        statusMap[user.id] = user.conectado;
+      });
+      setOnlineStatus(statusMap);
+
+      setClients(prevClients => 
+        prevClients.map(client => ({
+          ...client,
+          conectado: statusMap[client.id] || false
+        }))
+      );
+    });
+
     newSocket.on('new chat', (msg) => {
-      // Mostrar el mensaje si es del cliente seleccionado o si eres tú
       if (
         selectedClient &&
-        (msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
-        (msg.remitente === selectedClient.id && msg.destinatario === usuario.id)
+        ((msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
+          (msg.remitente === selectedClient.id && msg.destinatario === usuario.id))
       ) {
-        setMessages((prevMessages) => [
+        setMessages(prevMessages => [
           ...prevMessages,
           {
             ...msg,
@@ -45,7 +65,6 @@ function Chat() {
       }
     });
 
-    // Cargar lista de clientes
     const fetchClients = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/usuarios');
@@ -69,7 +88,7 @@ function Chat() {
 
   const startNewChat = (client) => {
     setSelectedClient(client);
-    setMessages([]); // Limpiar mensajes anteriores
+    setMessages([]);
     setNewChatModal(false);
   };
 
@@ -85,7 +104,7 @@ function Chat() {
 
       socket.emit('new chat', messageData);
 
-      setMessages((prevMessages) => [
+      setMessages(prevMessages => [
         ...prevMessages,
         {
           ...messageData,
@@ -96,11 +115,6 @@ function Chat() {
       setInputMessage('');
     }
   };
-
-  const filteredClients = clients.filter((client) =>
-    client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   if (!usuario) {
     return <div className="loading">Cargando usuario...</div>;
@@ -114,7 +128,6 @@ function Chat() {
       </header>
 
       <div className="chat-container">
-        {/* Panel de contactos */}
         <div className="contacts-panel">
           <div className="contacts-header">
             <h2>Clientes</h2>
@@ -138,7 +151,13 @@ function Chat() {
                 >
                   <div className="contact-avatar">{client.nombre.charAt(0)}</div>
                   <div className="contact-info">
-                    <h3>{client.nombre}</h3>
+                    <h3>
+                      {client.nombre}
+                      <span 
+                        className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}
+                        title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}
+                      ></span>
+                    </h3>
                     <p>{client.email}</p>
                   </div>
                 </div>
@@ -147,15 +166,22 @@ function Chat() {
           </div>
         </div>
 
-        {/* Área de chat */}
         <div className="chat-area">
           {selectedClient ? (
             <>
               <div className="chat-header">
                 <div className="client-info">
                   <div className="client-avatar">{selectedClient.nombre.charAt(0)}</div>
-                  <h2>{selectedClient.nombre}</h2>
-                  <p>{selectedClient.email}</p>
+                  <div>
+                    <h2>
+                      {selectedClient.nombre}
+                      <span 
+                        className={`status-indicator ${onlineStatus[selectedClient.id] ? 'online' : 'offline'}`}
+                        title={onlineStatus[selectedClient.id] ? 'En línea' : 'Desconectado'}
+                      ></span>
+                    </h2>
+                    <p>{selectedClient.email}</p>
+                  </div>
                 </div>
               </div>
 
@@ -173,7 +199,10 @@ function Chat() {
                       <div className="message-content">
                         <p>{msg.mensaje}</p>
                         <span className="message-time">
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </span>
                       </div>
                     </div>
@@ -200,7 +229,6 @@ function Chat() {
         </div>
       </div>
 
-      {/* Modal para nuevo chat */}
       {newChatModal && (
         <div className="modal-overlay">
           <div className="new-chat-modal">
@@ -226,7 +254,13 @@ function Chat() {
                   >
                     <div className="client-avatar">{client.nombre.charAt(0)}</div>
                     <div className="client-details">
-                      <h3>{client.nombre}</h3>
+                      <h3>
+                        {client.nombre}
+                        <span 
+                          className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}
+                          title={onlineStatus[client.id] ? 'En línea' : 'Desconectado'}
+                        ></span>
+                      </h3>
                       <p>{client.email}</p>
                     </div>
                   </div>
