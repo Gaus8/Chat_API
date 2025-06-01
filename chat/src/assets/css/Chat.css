@@ -231,3 +231,62 @@ h1 {
     width: 100%;
   }
 }
+
+
+/* En ambos archivos CSS (Chat.css y ChatEmpresa.css) */
+.mensajes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 60vh;
+  padding: 10px;
+  flex-grow: 1;
+}
+
+.mensaje-contenedor {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.mensaje-contenedor.derecha {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.mensaje-contenedor.izquierda {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.mensaje-burbuja {
+  padding: 10px 15px;
+  border-radius: 18px;
+  margin-bottom: 5px;
+  word-wrap: break-word;
+}
+
+/* Estilo para mensajes enviados */
+.mensaje-contenedor.derecha .mensaje-burbuja {
+  background-color: #dcf8c6; /* Verde claro para enviados */
+}
+
+/* Estilo para mensajes recibidos */
+.mensaje-contenedor.izquierda .mensaje-burbuja {
+  background-color: #ffffff; /* Blanco para recibidos */
+  border: 1px solid #eaeaea;
+}
+
+.mensaje-nombre {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+.mensaje-hora {
+  color: #666;
+  font-size: 0.8em;
+  margin-left: 10px;
+}

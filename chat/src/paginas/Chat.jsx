@@ -8,79 +8,54 @@ function Chat() {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [empresasConectadas, setEmpresasConectadas] = useState([]);
+  const [nombreEmpresa, setNombreEmpresa] = useState('Nuestra Empresa');
 
   useEffect(() => {
     const newSocket = io('http://localhost:3000');
-
     setSocket(newSocket);
 
-    // Cuando conectamos, enviamos quién somos (identify)
     newSocket.on('connect', () => {
-      if (usuario) {
-        newSocket.emit('identify', {
-          nombre: usuario.nombre,
-          type: usuario.type,  // "Usuario" o "Empresa"
-        });
+      newSocket.emit('identify', {
+        nombre: usuario.nombre,
+        type: usuario.type,
+      });
+    });
 
-        // Si soy usuario, pido la lista de empresas conectadas
-        if (usuario.type === 'Usuario') {
-          newSocket.emit('get empresas conectadas');
-        }
+    newSocket.on('chat message', (msg) => {
+      if ((msg.destinatario === usuario.nombre && msg.remitente === nombreEmpresa) || 
+          (msg.destinatario === nombreEmpresa && msg.remitente === usuario.nombre)) {
+        setMessages(prev => [...prev, msg].sort((a, b) => 
+          new Date(a.timestamp) - new Date(b.timestamp)
+        ));
       }
     });
 
-    // Recibir mensajes
-    newSocket.on('chat message', (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]);
+    newSocket.on('previous messages', (mensajesPrevios) => {
+      const mensajesFiltrados = mensajesPrevios.filter(
+        m => (m.remitente === usuario.nombre && m.destinatario === nombreEmpresa) ||
+             (m.remitente === nombreEmpresa && m.destinatario === usuario.nombre)
+      );
+      setMessages(mensajesFiltrados.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
     });
-
-    // Recibir lista de empresas conectadas (solo usuarios la reciben)
-    newSocket.on('empresas conectadas', (empresas) => {
-      setEmpresasConectadas(empresas);
-    });
-
-    // Tu código para videos y modales (sin cambios)
-    const videoIntro = document.getElementById('previewVideo');
-    const videoModal = document.getElementById('videoModal');
-    const closeModal = document.getElementById('closeModal');
-
-    if (videoIntro && videoModal && closeModal) {
-      videoIntro.addEventListener('click', () => {
-        videoModal.style.display = 'flex';
-        const modalVideo = videoModal.querySelector('video');
-        if (modalVideo) modalVideo.play();
-      });
-
-      closeModal.addEventListener('click', () => {
-        videoModal.style.display = 'none';
-        const modalVideo = videoModal.querySelector('video');
-        if (modalVideo) modalVideo.pause();
-      });
-
-      videoModal.addEventListener('click', (e) => {
-        if (e.target === videoModal) {
-          videoModal.style.display = 'none';
-          const modalVideo = videoModal.querySelector('video');
-          if (modalVideo) modalVideo.pause();
-        }
-      });
-    }
 
     return () => {
       newSocket.close();
     };
-  }, [usuario]);
+  }, [usuario, nombreEmpresa]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputMessage.trim() && socket) {
-      socket.emit('chat message', {
-        nombre: usuario?.nombre || "Anónimo",
+      const nuevoMensaje = {
+        remitente: usuario.nombre,
+        destinatario: nombreEmpresa,
         mensaje: inputMessage,
-        rol: usuario?.type || "Usuario"
-      });
-
+        timestamp: new Date().toISOString(),
+        rol: usuario?.rol || "Usuario"
+      };
+      
+      setMessages(prev => [...prev, nuevoMensaje]);
+      socket.emit('chat privado mensaje', nuevoMensaje);
       setInputMessage('');
     }
   };
@@ -89,32 +64,13 @@ function Chat() {
     <>
       <div>
         {usuario ? (
-          <h1>Hola {usuario.nombre}, bienvenido al chat</h1>
+          <h1>Hola {usuario.nombre}, bienvenido al chat de {nombreEmpresa}</h1>
         ) : (
           <p>Cargando...</p>
         )}
       </div>
-
-      {/* Mostrar empresas conectadas (solo para usuario) */}
-      {usuario?.type === 'Usuario' && (
-        <div>
-          <h2>Empresas conectadas:</h2>
-          <ul>
-            {empresasConectadas.length === 0 ? (
-              <li>No hay empresas conectadas</li>
-            ) : (
-              empresasConectadas.map((empresa, i) => (
-                <li key={i}>{empresa.nombre}</li>
-              ))
-            )}
-          </ul>
-        </div>
-      )}
-
       <div className="body-chat">
         <div className="contenedor">
-          {/* ... el resto de tu código del chat sin cambios */}
-          
           <div className="contenedor-chat">
             <section id="chat">
               <form id="form" onSubmit={handleSubmit}>
@@ -122,23 +78,30 @@ function Chat() {
                   type="text"
                   name="message"
                   id="input"
-                  placeholder="Escribe tu mensaje"
+                  placeholder={`Escribe tu mensaje para ${nombreEmpresa}...`}
                   autoComplete="off"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                 />
-                <button type="submit">📤 Enviar</button>
+                <button type="submit" disabled={!inputMessage.trim()}>
+                  📤 Enviar
+                </button>
               </form>
               <div className="mensajes">
                 {messages.map((msg, index) => (
                   <div
                     key={index}
                     className={`mensaje-burbuja ${
-                      msg.rol === usuario?.type ? 'derecha' : 'izquierda'
+                      msg.remitente === usuario.nombre ? 'derecha' : 'izquierda'
                     }`}
                   >
                     <div className="mensaje-nombre">
-                      <strong>{msg.nombre}</strong>
+                      <strong>
+                        {msg.remitente === usuario.nombre ? 'Tú' : nombreEmpresa}
+                      </strong>
+                      <span className="mensaje-hora">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
                     </div>
                     <div className="mensaje-texto">{msg.mensaje}</div>
                   </div>
@@ -149,7 +112,7 @@ function Chat() {
         </div>
 
         <footer>
-          <div id="piepagina-chat">© 2025 ChatAPI | Creado por FullHacks</div>
+          <div id="piepagina-chat">© 2025 {nombreEmpresa} | Todos los derechos reservados</div>
         </footer>
       </div>
     </>

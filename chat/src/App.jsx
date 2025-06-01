@@ -24,6 +24,7 @@ function App() {
     {path:'/restablecer_password/:token', element:<RestablecerPassword />},
     {path:'/chat_empresa', element:<ChatEmpresa />},
     {path:'/main_empresa', element:<MenuEmpresa />},
+  
 
   ])
   return (
