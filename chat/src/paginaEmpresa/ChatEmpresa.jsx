@@ -1,173 +1,240 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import '../assets/css/ChatEmpresa.css';
 import Token from '../assets/funciones/Token';
 import { io } from 'socket.io-client';
 import axios from 'axios';
-
-function ChatEmpresa() {
-  const empresa = Token();
+function Chat() {
+  const usuario = Token();
   const [socket, setSocket] = useState(null);
-  const [usuarios, setUsuarios] = useState([]);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
-  const [mensajes, setMensajes] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-
-  const fetchClients = useCallback(async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/api/usuarios');
-      setUsuarios(response.data.usuarios || []);
-    } catch (err) {
-      console.error('Error al obtener usuarios:', err);
-    }
-  }, []);
-
-  const handleSeleccionCliente = useCallback((cliente) => {
-    setClienteSeleccionado(cliente);
-    if (socket) {
-      socket.emit('get mensajes privados', {
-        usuario1: empresa.nombre,
-        usuario2: cliente.nombre,
-      });
-    }
-  }, [socket, empresa]);
-
-  const handleEnviarMensaje = useCallback((e) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || !socket || !clienteSeleccionado) return;
-
-    const mensajeObj = {
-      remitente: empresa.nombre,
-      destinatario: clienteSeleccionado.nombre,
-      mensaje: inputMessage.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMensajes(prev => [...prev, mensajeObj]);
-    socket.emit('chat privado mensaje', mensajeObj);
-    setInputMessage('');
-  }, [inputMessage, socket, clienteSeleccionado, empresa]);
+  const [clients, setClients] = useState([]);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [newChatModal, setNewChatModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (!empresa) return;
+    if (!usuario) return;
 
+    // Conectar con el servidor Socket.IO
     const newSocket = io('http://localhost:3000', {
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
+      query: { userId: usuario.id, userType: usuario.rol }
     });
+
 
     setSocket(newSocket);
 
-    newSocket.on('connect', () => {
-      console.log('Conectado al servidor de sockets');
-      newSocket.emit('identify', {
-        nombre: empresa.nombre,
-        type: empresa.type,
-      });
-      fetchClients();
-    });
+    // Cargar lista de clientes (simulado)
+    const fetchClients = async () => {
+      let clientes = ''
+      try {
+        const response = await axios.get('http://localhost:3000/api/usuarios');
+        if (response.status === 200) {
+          clientes = response.data?.usuarios;
+        }
+      }
+      catch(err){
+        console.log(err)
+      }
+      setClients(clientes);
+      setIsLoading(false);
+    };
 
-    newSocket.on('previous messages', (mensajesPrevios) => {
-      setMensajes(mensajesPrevios.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
-    });
+    fetchClients();
 
+    // Escuchar mensajes entrantes
     newSocket.on('chat message', (msg) => {
-      if ((msg.remitente === clienteSeleccionado?.nombre && msg.destinatario === empresa.nombre) ||
-          (msg.remitente === empresa.nombre && msg.destinatario === clienteSeleccionado?.nombre)) {
-        setMensajes(prev =>
-          [...prev, msg].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-        );
+      if (msg.sender === selectedClient?.id || msg.receiver === selectedClient?.id) {
+        setMessages((prevMessages) => [...prevMessages, msg]);
+      }
+    });
+
+    // Escuchar cuando se inicia un nuevo chat
+    newSocket.on('new chat', ({ clientId, clientName }) => {
+      if (!clients.some(c => c.id === clientId)) {
+        setClients(prev => [...prev, { id: clientId, nombre: clientName }]);
       }
     });
 
     return () => {
-      newSocket.disconnect();
+      newSocket.close();
     };
-  }, [empresa, fetchClients, clienteSeleccionado]);
+  }, [usuario, selectedClient]);
+
+  const startNewChat = (client) => {
+    setSelectedClient(client);
+    setMessages([]); // Limpiar mensajes anteriores
+    // En una aplicación real, cargarías el historial de mensajes aquí
+    setNewChatModal(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputMessage.trim() && socket && selectedClient) {
+      const messageData = {
+        sender: usuario.id,
+        receiver: selectedClient.id,
+        senderName: usuario.nombre,
+        message: inputMessage,
+        timestamp: new Date().toISOString()
+      };
+
+      socket.emit('chat message', messageData);
+
+      // Agregar el mensaje al estado local
+      setMessages((prevMessages) => [...prevMessages, {
+        ...messageData,
+        isOwn: true
+      }]);
+
+      setInputMessage('');
+    }
+  };
+
+  const filteredClients = clients.filter(client =>
+    client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (!usuario) {
+    return <div className="loading">Cargando usuario...</div>;
+  }
 
   return (
-    <div className="chat-empresa">
-      <aside className="lista-clientes">
-        <h2>Clientes</h2>
-        <ul>
-          {usuarios.length > 0 ? (
-            usuarios.map((user) => (
-              <li
-                key={user._id}
-                onClick={() => handleSeleccionCliente(user)}
-                className={clienteSeleccionado?.nombre === user.nombre ? 'activo' : ''}
-              >
-                {user.nombre}
-              </li>
-            ))
-          ) : (
-            <li className="sin-clientes">No hay clientes disponibles</li>
-          )}
-        </ul>
-      </aside>
+    <div className="chat-empresarial">
+      <header className="chat-header">
+        <h1>Chat Empresarial - {usuario.nombre}</h1>
+        <p>Conecta con tus clientes en tiempo real</p>
+      </header>
 
-      <section className="chat-privado">
-        {clienteSeleccionado ? (
-          <>
-            <div className="chat-header">
-              <h3>Chat con {clienteSeleccionado.nombre}</h3>
-            </div>
+      <div className="chat-container">
+        {/* Panel de contactos */}
+        <div className="contacts-panel">
+          <div className="contacts-header">
+            <h2>Clientes</h2>
+            <button
+              className="new-chat-btn"
+              onClick={() => setNewChatModal(true)}
+            >
+              + Nuevo chat
+            </button>
+          </div>
 
-            <div className="mensajes-container">
-              {mensajes.length > 0 ? (
-                mensajes.map((msg, i) => (
-                  <div
-                    key={`${msg.timestamp}-${i}`}
-                    className={`mensaje-contenedor ${
-                      msg.remitente === empresa.nombre ? 'derecha' : 'izquierda'
-                    }`}
-                  >
-                    <div className="mensaje-burbuja">
-                      <div className="mensaje-nombre">
-                        <strong>{msg.remitente === empresa.nombre ? 'Tú' : msg.remitente}</strong>
-                        <span className="mensaje-hora">
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+          <div className="contacts-list">
+            {isLoading ? (
+              <div className="loading">Cargando clientes...</div>
+            ) : (
+              clients.map(client => (
+                <div
+                  key={client.id}
+                  className={`contact-item ${selectedClient?.id === client.id ? 'active' : ''}`}
+                  onClick={() => startNewChat(client)}
+                >
+                  <div className="contact-avatar">{client.nombre.charAt(0)}</div>
+                  <div className="contact-info">
+                    <h3>{client.nombre}</h3>
+                    <p>{client.email}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Área de chat */}
+        <div className="chat-area">
+          {selectedClient ? (
+            <>
+              <div className="chat-header">
+                <div className="client-info">
+                  <div className="client-avatar">{selectedClient.nombre.charAt(0)}</div>
+                  <h2>{selectedClient.nombre}</h2>
+                  <p>{selectedClient.email}</p>
+                </div>
+              </div>
+
+              <div className="messages-container">
+                {messages.length === 0 ? (
+                  <div className="empty-chat">
+                    <p>Inicia una conversación con {selectedClient.nombre}</p>
+                  </div>
+                ) : (
+                  messages.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`message ${msg.sender === usuario.id ? 'sent' : 'received'}`}
+                    >
+                      <div className="message-content">
+                        <p>{msg.message}</p>
+                        <span className="message-time">
+                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <div className="mensaje-texto">{msg.mensaje}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <form className="message-form" onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  placeholder="Escribe tu mensaje..."
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                />
+                <button type="submit">Enviar</button>
+              </form>
+            </>
+          ) : (
+            <div className="no-chat-selected">
+              <h2>Selecciona un cliente para chatear</h2>
+              <p>O inicia una nueva conversación</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal para nuevo chat */}
+      {newChatModal && (
+        <div className="modal-overlay">
+          <div className="new-chat-modal">
+            <div className="modal-header">
+              <h2>Nuevo chat</h2>
+              <button onClick={() => setNewChatModal(false)}>×</button>
+            </div>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Buscar cliente..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="client-list">
+              {filteredClients.length > 0 ? (
+                filteredClients.map(client => (
+                  <div
+                    key={client.id}
+                    className="client-item"
+                    onClick={() => startNewChat(client)}
+                  >
+                    <div className="client-avatar">{client.nombre.charAt(0)}</div>
+                    <div className="client-details">
+                      <h3>{client.nombre}</h3>
+                      <p>{client.email}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="sin-mensajes">No hay mensajes previos con este cliente</div>
+                <p>No se encontraron clientes</p>
               )}
             </div>
-
-            <form onSubmit={handleEnviarMensaje} className="form-chat">
-              <input
-                type="text"
-                placeholder={`Escribe un mensaje para ${clienteSeleccionado.nombre}...`}
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                autoComplete="off"
-                aria-label="Mensaje"
-              />
-              <button type="submit" disabled={!inputMessage.trim()}>
-                📤 Enviar
-              </button>
-            </form>
-          </>
-        ) : (
-          <div className="seleccionar-cliente">
-            <div className="instrucciones-container">
-              <p>Selecciona un cliente para iniciar el chat</p>
-              <div className="instrucciones-detalle">
-                <p>Puedes comunicarte directamente con tus clientes a través de este chat.</p>
-                <p>Todos los mensajes son privados entre tú y el cliente seleccionado.</p>
-              </div>
-            </div>
           </div>
-        )}
-      </section>
+        </div>
+      )}
     </div>
   );
 }
 
-export default ChatEmpresa;
+export default Chat;
