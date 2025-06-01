@@ -3,6 +3,7 @@ import '../assets/css/ChatEmpresa.css';
 import Token from '../assets/funciones/Token';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+
 function Chat() {
   const usuario = Token();
   const [socket, setSocket] = useState(null);
@@ -17,45 +18,49 @@ function Chat() {
   useEffect(() => {
     if (!usuario) return;
 
-    // Conectar con el servidor Socket.IO
-    const newSocket = io('http://localhost:3000', {
-      query: { userId: usuario.id, userType: usuario.rol }
-    });
-
-
+    const newSocket = io('http://localhost:3000');
     setSocket(newSocket);
 
-    // Cargar lista de clientes (simulado)
+    newSocket.on('connect', () => {
+      newSocket.emit('identify', {
+        nombre: usuario.nombre,
+        type: usuario.type,
+      });
+    });
+
+    newSocket.on('new chat', (msg) => {
+      // Mostrar el mensaje si es del cliente seleccionado o si eres tú
+      if (
+        selectedClient &&
+        (msg.remitente === usuario.nombre && msg.destinatario === selectedClient.nombre) ||
+        (msg.remitente === selectedClient.nombre && msg.destinatario === usuario.nombre)
+      ) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            ...msg,
+            isOwn: msg.remitente === usuario.nombre,
+          },
+        ]);
+      }
+    });
+
+    // Cargar lista de clientes
     const fetchClients = async () => {
-      let clientes = ''
       try {
         const response = await axios.get('http://localhost:3000/api/usuarios');
         if (response.status === 200) {
-          clientes = response.data?.usuarios;
+          const clientes = response.data?.usuarios || [];
+          setClients(clientes);
         }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setIsLoading(false);
       }
-      catch(err){
-        console.log(err)
-      }
-      setClients(clientes);
-      setIsLoading(false);
     };
 
     fetchClients();
-
-    // Escuchar mensajes entrantes
-    newSocket.on('chat message', (msg) => {
-      if (msg.sender === selectedClient?.id || msg.receiver === selectedClient?.id) {
-        setMessages((prevMessages) => [...prevMessages, msg]);
-      }
-    });
-
-    // Escuchar cuando se inicia un nuevo chat
-    newSocket.on('new chat', ({ clientId, clientName }) => {
-      if (!clients.some(c => c.id === clientId)) {
-        setClients(prev => [...prev, { id: clientId, nombre: clientName }]);
-      }
-    });
 
     return () => {
       newSocket.close();
@@ -65,7 +70,6 @@ function Chat() {
   const startNewChat = (client) => {
     setSelectedClient(client);
     setMessages([]); // Limpiar mensajes anteriores
-    // En una aplicación real, cargarías el historial de mensajes aquí
     setNewChatModal(false);
   };
 
@@ -73,26 +77,27 @@ function Chat() {
     e.preventDefault();
     if (inputMessage.trim() && socket && selectedClient) {
       const messageData = {
-        sender: usuario.id,
-        receiver: selectedClient.id,
-        senderName: usuario.nombre,
-        message: inputMessage,
-        timestamp: new Date().toISOString()
+        remitente: usuario.nombre,
+        destinatario: selectedClient.nombre,
+        mensaje: inputMessage,
+        timestamp: new Date().toISOString(),
       };
 
-      socket.emit('chat message', messageData);
+      socket.emit('new chat', messageData);
 
-      // Agregar el mensaje al estado local
-      setMessages((prevMessages) => [...prevMessages, {
-        ...messageData,
-        isOwn: true
-      }]);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          ...messageData,
+          isOwn: true,
+        },
+      ]);
 
       setInputMessage('');
     }
   };
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients = clients.filter((client) =>
     client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -125,7 +130,7 @@ function Chat() {
             {isLoading ? (
               <div className="loading">Cargando clientes...</div>
             ) : (
-              clients.map(client => (
+              clients.map((client) => (
                 <div
                   key={client.id}
                   className={`contact-item ${selectedClient?.id === client.id ? 'active' : ''}`}
@@ -163,10 +168,10 @@ function Chat() {
                   messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`message ${msg.sender === usuario.id ? 'sent' : 'received'}`}
+                      className={`message ${msg.isOwn ? 'sent' : 'received'}`}
                     >
                       <div className="message-content">
-                        <p>{msg.message}</p>
+                        <p>{msg.mensaje}</p>
                         <span className="message-time">
                           {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
@@ -213,7 +218,7 @@ function Chat() {
             </div>
             <div className="client-list">
               {filteredClients.length > 0 ? (
-                filteredClients.map(client => (
+                filteredClients.map((client) => (
                   <div
                     key={client.id}
                     className="client-item"

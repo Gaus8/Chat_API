@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react';
 import '../assets/css/Chat.css';
 import Token from '../assets/funciones/Token';
 import { io } from 'socket.io-client';
-
+import axios from 'axios';
 function Chat() {
   const usuario = Token();
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [nombreEmpresa, setNombreEmpresa] = useState('Nuestra Empresa');
+  const [nombreEmpresa, setNombreEmpresa] = useState('');
 
   useEffect(() => {
+    if (!usuario) return;
+
     const newSocket = io('http://localhost:3000');
     setSocket(newSocket);
 
@@ -21,22 +23,41 @@ function Chat() {
       });
     });
 
-    newSocket.on('chat message', (msg) => {
-      if ((msg.destinatario === usuario.nombre && msg.remitente === nombreEmpresa) || 
-          (msg.destinatario === nombreEmpresa && msg.remitente === usuario.nombre)) {
-        setMessages(prev => [...prev, msg].sort((a, b) => 
-          new Date(a.timestamp) - new Date(b.timestamp)
-        ));
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/empresas');
+        if (response.status === 200) {
+          const empresas = response.data?.empresas
+          if (empresas.length > 0) {
+            setNombreEmpresa(empresas[0].nombre); // o la que quieras usar
+          }
+        }
       }
+      catch (err) {
+        console.log(err)
+      }
+    };
+
+    fetchClients();
+
+
+    newSocket.on("new chat", (msg) => {
+      // Solo mostrar el mensaje si es del cliente seleccionado o si eres tú
+      if (
+        (msg.remitente === usuario.nombre && msg.destinatario === nombreEmpresa) ||
+        (msg.remitente === nombreEmpresa && msg.destinatario === usuario.nombre)
+      ) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            ...msg,
+            isOwn: msg.remitente === usuario.nombre,
+          },
+        ]);
+      }
+
     });
 
-    newSocket.on('previous messages', (mensajesPrevios) => {
-      const mensajesFiltrados = mensajesPrevios.filter(
-        m => (m.remitente === usuario.nombre && m.destinatario === nombreEmpresa) ||
-             (m.remitente === nombreEmpresa && m.destinatario === usuario.nombre)
-      );
-      setMessages(mensajesFiltrados.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
-    });
 
     return () => {
       newSocket.close();
@@ -46,18 +67,23 @@ function Chat() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputMessage.trim() && socket) {
-      const nuevoMensaje = {
+      const messageData = {
         remitente: usuario.nombre,
         destinatario: nombreEmpresa,
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
-        rol: usuario?.rol || "Usuario"
       };
-      
-      setMessages(prev => [...prev, nuevoMensaje]);
-      socket.emit('chat privado mensaje', nuevoMensaje);
+
+
+      setMessages((prevMessages) => [...prevMessages, {
+        ...messageData,
+        isOwn: true
+      }]);
+      socket.emit('new chat', messageData);
       setInputMessage('');
     }
+
+
   };
 
   return (
@@ -91,16 +117,15 @@ function Chat() {
                 {messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`mensaje-burbuja ${
-                      msg.remitente === usuario.nombre ? 'derecha' : 'izquierda'
-                    }`}
+                    className={`mensaje-burbuja ${msg.remitente === usuario.nombre ? 'derecha' : 'izquierda'
+                      }`}
                   >
                     <div className="mensaje-nombre">
                       <strong>
                         {msg.remitente === usuario.nombre ? 'Tú' : nombreEmpresa}
                       </strong>
                       <span className="mensaje-hora">
-                        {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <div className="mensaje-texto">{msg.mensaje}</div>
