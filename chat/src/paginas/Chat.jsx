@@ -8,7 +8,8 @@ function Chat() {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [empresaId, setEmpresaId] = useState('');
+ const [nombreEmpresa, setNombreEmpresa] = useState('');
 
   useEffect(() => {
     if (!usuario) return;
@@ -18,7 +19,7 @@ function Chat() {
 
     newSocket.on('connect', () => {
       newSocket.emit('identify', {
-        nombre: usuario.nombre,
+        usuarioId: usuario.id,
         type: usuario.type,
       });
     });
@@ -29,9 +30,12 @@ function Chat() {
         if (response.status === 200) {
           const empresas = response.data?.empresas
           if (empresas.length > 0) {
-            setNombreEmpresa(empresas[0].nombre); // o la que quieras usar
+            setEmpresaId(empresas[0].id);
+            setNombreEmpresa(empresas[0].nombre);
+             // o la que quieras usar
           }
         }
+    
       }
       catch (err) {
         console.log(err)
@@ -44,14 +48,14 @@ function Chat() {
     newSocket.on("new chat", (msg) => {
       // Solo mostrar el mensaje si es del cliente seleccionado o si eres tú
       if (
-        (msg.remitente === usuario.nombre && msg.destinatario === nombreEmpresa) ||
-        (msg.remitente === nombreEmpresa && msg.destinatario === usuario.nombre)
+        (msg.remitente === usuario.id && msg.destinatario === empresaId) ||
+        (msg.remitente === empresaId && msg.destinatario === usuario.id)
       ) {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
             ...msg,
-            isOwn: msg.remitente === usuario.nombre,
+            isOwn: msg.remitente === usuario.id,
           },
         ]);
       }
@@ -62,14 +66,14 @@ function Chat() {
     return () => {
       newSocket.close();
     };
-  }, [usuario, nombreEmpresa]);
+  }, [usuario, empresaId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputMessage.trim() && socket) {
       const messageData = {
-        remitente: usuario.nombre,
-        destinatario: nombreEmpresa,
+        remitente: usuario.id,
+        destinatario: empresaId,
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
       };
@@ -117,12 +121,12 @@ function Chat() {
                 {messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`mensaje-burbuja ${msg.remitente === usuario.nombre ? 'derecha' : 'izquierda'
+                    className={`mensaje-burbuja ${msg.remitente === usuario.id ? 'derecha' : 'izquierda'
                       }`}
                   >
                     <div className="mensaje-nombre">
                       <strong>
-                        {msg.remitente === usuario.nombre ? 'Tú' : nombreEmpresa}
+                        {msg.remitente === usuario.id ? 'Tú' : nombreEmpresa}
                       </strong>
                       <span className="mensaje-hora">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

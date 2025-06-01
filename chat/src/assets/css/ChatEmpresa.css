@@ -242,3 +242,31 @@
   text-align: center;
   color: #7f8c8d;
 }
+
+.contact-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  display: inline-block;
+}
+
+.online {
+  background-color: #00c853; /* verde */
+}
+.contact-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  display: inline-block;
+}
+
+.online {
+  background-color: #00c853; /* verde */
+}
+
+.offline {
+  background-color: #fd0000; /* gris */
+}
+

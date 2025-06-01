@@ -23,7 +23,7 @@ function Chat() {
 
     newSocket.on('connect', () => {
       newSocket.emit('identify', {
-        nombre: usuario.nombre,
+        usuarioId: usuario.id,
         type: usuario.type,
       });
     });
@@ -32,14 +32,14 @@ function Chat() {
       // Mostrar el mensaje si es del cliente seleccionado o si eres tú
       if (
         selectedClient &&
-        (msg.remitente === usuario.nombre && msg.destinatario === selectedClient.nombre) ||
-        (msg.remitente === selectedClient.nombre && msg.destinatario === usuario.nombre)
+        (msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
+        (msg.remitente === selectedClient.id && msg.destinatario === usuario.id)
       ) {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
             ...msg,
-            isOwn: msg.remitente === usuario.nombre,
+            isOwn: msg.remitente === usuario.id,
           },
         ]);
       }
@@ -77,8 +77,8 @@ function Chat() {
     e.preventDefault();
     if (inputMessage.trim() && socket && selectedClient) {
       const messageData = {
-        remitente: usuario.nombre,
-        destinatario: selectedClient.nombre,
+        remitente: usuario.id,
+        destinatario: selectedClient.id,
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
       };
