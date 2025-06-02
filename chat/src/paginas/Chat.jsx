@@ -307,7 +307,7 @@ function Chat() {
 
         <footer>
           <div id="piepagina-chat">
-            © 2025 {nombreEmpresa} | Todos los derechos reservados
+            © 2025 FULL HACKS | Todos los derechos reservados
           </div>
         </footer>
       </div>
