@@ -2,7 +2,12 @@ import '../assets/css/MenuPrincipal.css';
 import { useState } from 'react';
 import axios from 'axios';
 import Token from '../assets/funciones/Token';
+import Grafico from './Graficos';
+import { useEffect } from 'react';
+
 function MenuPrincipal() {
+
+    const [productos, setProductos] = useState([]);
 
     const usuario = Token()
 
@@ -20,7 +25,36 @@ function MenuPrincipal() {
             console.error("Error al cerrar sesión:", err);
         }
     };
-   return (
+
+    useEffect(() => {
+        const consultarProductos = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/estadisticas/${usuario.id}/683dac1084b6bf73c7d780b0`)
+                if (response.status === 200) {
+                        const productosFormateados = Object.entries(response.data).map(([nombre, cantidad]) => ({
+                    nombre,
+                    cantidad,
+                }));
+                setProductos(productosFormateados);
+                    
+                }
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
+         if (usuario?.id) {
+        consultarProductos();
+    }
+      
+    },[usuario])
+
+  useEffect(() => {
+  console.log("Productos actualizados:", productos);
+}, [productos]); // solo cuando productos cambia
+
+return (
+    <>
         <header className="menu-header">
             <div className="logo-container">
                 <img src="img/flecha.png" alt="Logo" className="logo" />
@@ -55,7 +89,11 @@ function MenuPrincipal() {
                 </div>
             </div>
         </header>
-    );
+        <Grafico 
+            productos={productos}
+        />
+    </>
+);
  
 }
 

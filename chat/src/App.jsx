@@ -27,7 +27,6 @@ function App() {
     {path:'/main_empresa', element:<MenuEmpresa />},
     {path:'/graficos', element:<Grafico />},
   
-
   ])
   return (
     <RouterProvider router={router} />
