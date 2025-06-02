@@ -434,3 +434,63 @@
   cursor: pointer;
   user-select: text;
 }
+
+/* Estilos para acciones de mensaje (editar/eliminar) */
+.message-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+  opacity: 0; /* Inicialmente invisibles */
+  transition: opacity 0.2s ease;
+}
+
+.message:hover .message-actions {
+  opacity: 1; /* Visibles al hacer hover */
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+/* Estilos para mensajes enviados (azules) */
+.message.sent .edit-btn,
+.message.sent .delete-btn {
+  color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.message.sent .edit-btn:hover,
+.message.sent .delete-btn:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Estilos para mensajes recibidos (blancos) */
+.message.received .edit-btn,
+.message.received .delete-btn {
+  color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.message.received .edit-btn:hover,
+.message.received .delete-btn:hover {
+  color: #333;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+
+.delete-btn::after {
+  content: "🗑️";
+}
+
+/* Asegurar que los botones solo aparezcan en mensajes propios */
+.message:not(.sent) .message-actions {
+  display: none;
+}
