@@ -426,3 +426,32 @@ footer {
 
 
 
+/* Asegurar que solo un formulario de edición se muestre a la vez */
+.edit-message-container {
+  display: none;
+}
+
+.mensaje-burbuja.editing .edit-message-container {
+  display: block;
+}
+
+/* Ocultar acciones cuando se está editando */
+.mensaje-burbuja.editing .message-actions {
+  display: none;
+}
+
+.mensajes::-webkit-scrollbar-track {
+  background: rgba(144, 202, 249, 0.2);
+  border-radius: 10px;
+}
+
+.mensajes::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #42a5f5, #1e88e5);
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.mensajes::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #1e88e5, #1565c0);
+}
+
