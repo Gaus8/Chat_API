@@ -272,7 +272,6 @@ function Chat() {
                               className="delete-btn"
                               title="Eliminar mensaje"
                             >
-                              🗑️
                             </button>
                           </div>
                         )}

@@ -18,6 +18,7 @@ function Chat() {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingMessageContent, setEditingMessageContent] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState({});
 
   const filteredClients = clients.filter(client =>
     client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,20 +57,51 @@ function Chat() {
   }, [usuario]);
 
   useEffect(() => {
-    if (!socket || !selectedClient) return;
+    if (!socket) return;
 
     const handleNewMessage = (msg) => {
-      if (
-        (msg.remitente === usuario.id && msg.destinatario === selectedClient.id) ||
-        (msg.remitente === selectedClient.id && msg.destinatario === usuario.id)
-      ) {
-        setMessages(prev => [...prev, { ...msg, isOwn: msg.remitente === usuario.id }]);
+      // Si el mensaje es para el usuario actual
+      if (msg.destinatario === usuario.id) {
+        // Si el mensaje no viene del chat actualmente seleccionado
+        if (!selectedClient || msg.remitente !== selectedClient.id) {
+          // Incrementar el contador de mensajes no leídos
+          setUnreadMessages(prev => ({
+            ...prev,
+            [msg.remitente]: (prev[msg.remitente] || 0) + 1
+          }));
+          
+          // Mostrar notificación del navegador
+          if (Notification.permission === 'granted') {
+            const sender = clients.find(c => c.id === msg.remitente);
+            new Notification(`Nuevo mensaje de ${sender?.nombre || 'Usuario'}`, {
+              body: msg.mensaje.length > 30 ? `${msg.mensaje.substring(0, 30)}...` : msg.mensaje,
+            });
+          }
+        }
+        
+        // Si estamos en el chat correcto, agregar el mensaje
+        if (selectedClient && msg.remitente === selectedClient.id) {
+          setMessages(prev => [...prev, { ...msg, isOwn: false }]);
+        }
+      }
+      
+      // Si el mensaje es enviado por el usuario actual
+      if (msg.remitente === usuario.id && selectedClient && msg.destinatario === selectedClient.id) {
+        setMessages(prev => [...prev, { ...msg, isOwn: true }]);
       }
     };
 
     socket.on('new chat', handleNewMessage);
     return () => socket.off('new chat', handleNewMessage);
-  }, [socket, selectedClient, usuario]);
+  }, [socket, selectedClient, usuario, clients]);
+
+  useEffect(() => {
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        console.log('Permiso de notificación:', permission);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (!usuario) return;
@@ -105,11 +137,36 @@ function Chat() {
   }, [selectedClient, usuario]);
 
   const startNewChat = (client) => {
+    // Marcar mensajes como leídos al abrir el chat
+    setUnreadMessages(prev => {
+      const newUnread = {...prev};
+      delete newUnread[client.id];
+      return newUnread;
+    });
+    
     setSelectedClient(client);
     setMessages([]);
     setNewChatModal(false);
     setEditingMessageId(null);
     setShowDeleteConfirm(null);
+    
+    // Cargar mensajes del chat seleccionado
+    if (usuario) {
+      const fetchMessages = async () => {
+        try {
+          const res = await axios.get(`http://localhost:3000/api/mensajes/${usuario.id}/${client.id}`);
+          const mensajesBD = res.data.mensajes.map(msg => ({
+            ...msg,
+            id: msg._id,
+            isOwn: msg.remitente === usuario.id,
+          }));
+          setMessages(mensajesBD);
+        } catch (err) {
+          console.error('Error al cargar mensajes:', err);
+        }
+      };
+      fetchMessages();
+    }
   };
 
   const handleSubmit = (e) => {
@@ -130,11 +187,11 @@ function Chat() {
   const handleEdit = (msg) => {
     setEditingMessageId(msg.id);
     setEditingMessageContent(msg.mensaje);
-    setShowDeleteConfirm(null); // Cierra cualquier confirmación de eliminación abierta
+    setShowDeleteConfirm(null);
   };
 
   const saveEdit = async (msgId) => {
-  try {
+    try {
       await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, { 
         mensaje: editingMessageContent 
       });
@@ -149,14 +206,12 @@ function Chat() {
     } catch (err) {
       console.error('Error al editar mensaje:', err);
     }
-
-    
   };
 
   const cancelEdit = () => {
     setEditingMessageId(null);
     setEditingMessageContent('');
-  setShowDeleteConfirm(null);
+    setShowDeleteConfirm(null);
   };
 
   const handleDelete = async (msgId) => {
@@ -171,7 +226,7 @@ function Chat() {
 
   const toggleDeleteConfirm = (msgId) => {
     setShowDeleteConfirm(showDeleteConfirm === msgId ? null : msgId);
-    setEditingMessageId(null); // Cierra cualquier edición abierta
+    setEditingMessageId(null);
   };
 
   if (!usuario) {
@@ -212,6 +267,9 @@ function Chat() {
                     <h3>
                       {client.nombre}
                       <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}></span>
+                      {unreadMessages[client.id] > 0 && (
+                        <span className="unread-badge">{unreadMessages[client.id]}</span>
+                      )}
                     </h3>
                     <p>{client.email}</p>
                   </div>
@@ -244,7 +302,7 @@ function Chat() {
                   </div>
                 ) : (
                   messages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.isOwn ? 'sent' : 'received'}`}>
+                    <div key={msg.id} className={`message ${msg.isOwn ? 'sent' : 'received'}`}>
                       <div className="message-content">
                         {editingMessageId === msg.id ? (
                           <div className="edit-message-container">
@@ -296,7 +354,7 @@ function Chat() {
                                     className="delete-btn"
                                     title="Eliminar mensaje"
                                   >
-                                    
+                                    🗑️
                                   </button>
                                 </div>
                               )}
@@ -390,6 +448,9 @@ function Chat() {
                       <h3>
                         {client.nombre}
                         <span className={`status-indicator ${onlineStatus[client.id] ? 'online' : 'offline'}`}></span>
+                        {unreadMessages[client.id] > 0 && (
+                          <span className="unread-badge">{unreadMessages[client.id]}</span>
+                        )}
                       </h3>
                       <p>{client.email}</p>
                     </div>
