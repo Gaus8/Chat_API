@@ -1,398 +1,373 @@
-/* Fondo general */
-.body-chat {
+/* Chat.css - Versión Azul Marino Moderno con Efectos Innovadores */
+
+/* Estilos generales */
+body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background-image: url('/img/fondo.png');
-  background-size: cover;
-  background-position: center;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #e6f7ff 0%, #d1edff 100%);
 }
 
-/* Contenedor principal */
-.contenedor {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
-  gap: 20px;
-}
-
-/* Sección de texto e imagen */
-.container-texto {
-  flex: 1 1 350px;
-  max-width: 500px;
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 20px;
-  border-radius: 10px;
+.chat-header {
+  background: linear-gradient(to right, #1e88e5, #1976d2); /* Azul marino moderno */
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
   color: white;
+  position: relative;
+  overflow: hidden;
 }
 
-#imagen {
-  width: 50px;
-  margin-bottom: 10px;
-}
-
-h1 {
-    font-size: 20px;
-}
-#texto-video {
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-#cuadro {
-  height: 10px;
-  background-color: #fff;
-  margin: 10px 0;
-  border-radius: 6px;
-}
-
-#titulo-chat {
-  font-size: 24px;
-  margin-top: 10px;
-}
-
-#subtitulo-chat {
-  font-size: 16px;
-  margin: 10px 0;
-}
-
-#ventajas-chat {
-  font-size: 16px;
-}
-
-#ventajas-chat ul {
-  padding-left: 20px;
-}
-
-/* Video */
-.video-intro video {
-  width: 100%;
-  max-width: 200px;
-  border-radius: 10px;
-  cursor: pointer;
-  align-items: center;
-}
-
-
-/* Modal de video */
-#videoModal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0,0,0,0.8);
-  justify-content: center;
-  align-items: center;
-}
-
-
-#videoModal video {
-  width: 60%;
-  max-width: 300px;
-  border-radius: 12px;
-}
-
-
-#closeModal {
+.chat-header::before {
+  content: "";
   position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 36px;
-  color: white;
-  background: none;
-  border: none;
-  cursor: pointer;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: pulse 15s infinite linear;
 }
 
-/* Contenedor del chat */
-.contenedor-chat {
-  flex: 1 1 350px;
-  max-width: 400px;
-  margin-top: 90px;
-  height: 500px;
-  background-color: rgba(255, 255, 255, 0.85);
-  border-radius: 8px;
-  padding: 20px;
+@keyframes pulse {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.chat-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  color: white;
   position: relative;
 }
 
-.mensajes {
+.body-chat {
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  overflow-y: auto;
-  max-height: 400px;
+  min-height: 100vh;
 }
 
-.mensaje-burbuja {
-  max-width: 60%;
-  margin: 5px;
-  padding: 10px;
-  border-radius: 15px;
-  word-wrap: break-word;
-  display: inline-block;
-}
-
-.mensaje-nombre {
-  font-weight: bold;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-}
-
-.mensaje-texto {
-  font-size: 1rem;
-}
-
-/* Mensajes del cliente: a la izquierda */
-.izquierda {
-  background-color: #e6f3ff; /* azul claro */
-  align-self: flex-start;
-  text-align: left;
-  color: #003366;
-  border: 1px solid #b3d9ff;
-}
-
-/* Mensajes de la empresa: a la derecha */
-.derecha {
-  background-color: #003366; /* azul oscuro empresa */
-  align-self: flex-end;
-  text-align: right;
-  color: #ffffff;
-  border: 1px solid #001f4d;
-}
-
-
-/* Formulario de mensajes */
-#form {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
+.contenedor {
+  flex: 1;
   display: flex;
-  gap: 10px;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.contenedor-chat {
+  width: 100%;
+  max-width: 800px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(25, 118, 210, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 82vh;
+  position: relative;
+  border: 1px solid rgba(25, 118, 210, 0.1);
+}
+
+#chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Formulario de mensaje - Fijo en la parte inferior */
+#form {
+  display: flex;
+  padding: 1rem;
+  background: linear-gradient(to right, #1e88e5, #1976d2);
+  position: sticky;
+  bottom: 0;
+  border-top: 1px solid #1565c0;
+  box-shadow: 0 -4px 12px rgba(25, 118, 210, 0.2);
+  z-index: 10;
 }
 
 #input {
   flex: 1;
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  padding: 0.8rem 1.2rem;
+  border: 2px solid #90caf9;
+  border-radius: 30px;
+  outline: none;
+  font-size: 1rem;
+  margin-right: 0.8rem;
+  background-color: white;
+  transition: all 0.3s;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
-#form button {
-  background: #09f;
+#input:focus {
+  border-color: #42a5f5;
+  box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.2);
+}
+
+.send-button {
+  background: linear-gradient(to right, #42a5f5, #1e88e5);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 30px;
+  padding: 0 1.8rem;
   cursor: pointer;
-}
-
-#form button:hover {
-  background: #0cf;
-}
-
-/* Pie de página */
-#piepagina-chat {
-  text-align: center;
-  padding: 15px;
-  color: white;
-  background-color: rgba(0,0,0,0.5);
-}
-
-/* 🎯 Responsive design */
-@media (max-width: 600px) {
-  #titulo-chat {
-    font-size: 20px;
-  }
-
-  #subtitulo-chat,
-  #ventajas-chat {
-    font-size: 14px;
-  }
-
-  .contenedor-chat {
-    height: 400px;
-  }
-
-  #form {
-    flex-direction: column;
-  }
-
-  #form button {
-    width: 100%;
-  }
-}
-
-
-/* En ambos archivos CSS (Chat.css y ChatEmpresa.css) */
-.mensajes-container {
+  transition: all 0.3s;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+}
+
+.send-button:hover {
+  background: linear-gradient(to right, #1e88e5, #1565c0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.send-button:disabled {
+  background: #90caf9;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Área de mensajes */
+.mensajes {
+  flex: 1;
   overflow-y: auto;
-  max-height: 60vh;
-  padding: 10px;
-  flex-grow: 1;
-}
-
-.mensaje-contenedor {
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  max-width: 80%;
+  gap: 1.2rem;
+  background-color: #f5fbff;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(144, 202, 249, 0.05) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(144, 202, 249, 0.05) 0%, transparent 20%);
 }
 
-.mensaje-contenedor.derecha {
-  align-self: flex-end;
-  align-items: flex-end;
-}
-
-.mensaje-contenedor.izquierda {
-  align-self: flex-start;
-  align-items: flex-start;
-}
-
+/* Estilos de burbujas de mensaje */
 .mensaje-burbuja {
-  padding: 10px 15px;
-  border-radius: 18px;
-  margin-bottom: 5px;
+  max-width: 75%;
+  padding: 0.9rem 1.3rem;
+  border-radius: 20px;
+  position: relative;
   word-wrap: break-word;
+  line-height: 1.5;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Estilo para mensajes enviados */
-.mensaje-contenedor.derecha .mensaje-burbuja {
-  background-color: #dcf8c6; /* Verde claro para enviados */
+.mensaje-burbuja:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo para mensajes recibidos */
-.mensaje-contenedor.izquierda .mensaje-burbuja {
-  background-color: #ffffff; /* Blanco para recibidos */
-  border: 1px solid #eaeaea;
+.mensaje-burbuja.izquierda {
+  background-color: white;
+  border: 1px solid #e3f2fd;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+}
+
+.mensaje-burbuja.derecha {
+  background: linear-gradient(to right, #42a5f5, #1e88e5);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
 }
 
 .mensaje-nombre {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 0.9em;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .mensaje-hora {
-  color: #666;
-  font-size: 0.8em;
-  margin-left: 10px;
+  opacity: 0.8;
+  font-size: 0.75rem;
+  margin-left: 0.8rem;
 }
 
+.mensaje-burbuja.derecha .mensaje-hora {
+  color: rgba(255, 255, 255, 0.9);
+}
 
-/* Estilos para edición de mensajes */
-.edit-message-container {
-  margin-top: 8px;
+.mensaje-texto {
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+/* Acciones de mensaje - Estilo mejorado */
+.message-actions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mensaje-burbuja:hover .message-actions {
+  opacity: 1;
+}
+
+.edit-btn, .delete-btn {
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+  padding: 0.4rem;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-btn {
+  color: #1976d2;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.delete-btn {
+  color: #e53935;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.edit-btn:hover {
+  background: #1976d2;
+  color: white;
+  transform: scale(1.1);
+}
+
+.delete-btn:hover {
+  background: #e53935;
+  color: white;
+  transform: scale(1.1);
+}
+
+.mensaje-burbuja.derecha .edit-btn, 
+.mensaje-burbuja.derecha .delete-btn {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mensaje-burbuja.derecha .edit-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  color: #1976d2;
+}
+
+.mensaje-burbuja.derecha .delete-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  color: #e53935;
+}
+
+/* Efecto de flotación para iconos */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0px); }
+}
+
+.edit-btn:hover, .delete-btn:hover {
+  animation: float 1.5s ease-in-out infinite;
+}
+
+/* Edición de mensaje */
+.edit-message-container {
+  margin-top: 0.8rem;
+  background: rgba(233, 245, 253, 0.7);
+  padding: 0.8rem;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
 }
 
 .edit-message-input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #90caf9;
+  border-radius: 12px;
+  margin-bottom: 0.8rem;
+  background-color: white;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.edit-message-input:focus {
+  border-color: #42a5f5;
+  box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.2);
 }
 
 .edit-actions {
   display: flex;
-  gap: 8px;
+  gap: 0.8rem;
   justify-content: flex-end;
 }
 
 .save-edit-btn, .cancel-edit-btn {
-  padding: 4px 8px;
+  padding: 0.5rem 1.2rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 25px;
   cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .save-edit-btn {
-  background-color: #4CAF50;
+  background: linear-gradient(to right, #4caf50, #2e7d32);
   color: white;
+}
+
+.save-edit-btn:hover {
+  background: linear-gradient(to right, #3d8b40, #1b5e20);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .cancel-edit-btn {
-  background-color: #f44336;
+  background: linear-gradient(to right, #ef5350, #d32f2f);
   color: white;
 }
 
-/* Estilos para acciones de mensaje */
-.message-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 4px;
-}
-
-.edit-btn, .delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.edit-btn:hover, .delete-btn:hover {
-  opacity: 1;
+.cancel-edit-btn:hover {
+  background: linear-gradient(to right, #e53935, #b71c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 /* Confirmación de eliminación */
 .delete-confirmation {
-  margin-top: 8px;
-  padding: 8px;
-  background-color: #f8f8f8;
-  border-radius: 4px;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 0.8rem;
   text-align: center;
+  border: 1px solid #e3f2fd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+}
+
+.delete-confirmation p {
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  color: #555;
 }
 
 .confirmation-buttons {
   display: flex;
-  gap: 8px;
+  gap: 1rem;
   justify-content: center;
-  margin-top: 8px;
 }
 
-.confirm-delete-btn, .cancel-delete-btn {
-  padding: 4px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.confirm-delete-btn {
-  background-color: #f44336;
-  color: white;
-}
-
-.cancel-delete-btn {
-  background-color: #ccc;
-}
-
-/* Mejoras generales */
-.send-button {
-  transition: background-color 0.2s;
-}
-
-.send-button:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-.mensaje-texto {
-  cursor: pointer;
-  user-select: text;
-}
