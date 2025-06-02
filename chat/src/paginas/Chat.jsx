@@ -108,33 +108,11 @@ function Chat() {
     };
   }, [socket, usuario, empresaId]);
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (inputMessage.trim() && socket) {
-  //     const messageData = {
-  //       remitente: usuario.id,
-  //       destinatario: empresaId,
-  //       mensaje: inputMessage,
-  //       timestamp: new Date().toISOString(),
-  //     };
-
-  //     setMessages((prevMessages) => [
-  //       ...prevMessages,
-  //       {
-  //         ...messageData,
-  //         isOwn: true,
-  //       },
-  //     ]);
-  //     socket.emit('new chat', messageData);
-  //     setInputMessage('');
-  //   }
-  // };
-
-  // const handleEdit = (msg) => {
-  //   setEditingMessageId(msg.id);
-  //   setEditingMessageContent(msg.mensaje);
-  //   setShowDeleteConfirm(null);
-  // };
+  const handleEdit = (msg) => {
+    setEditingMessageId(msg.id);
+    setEditingMessageContent(msg.mensaje);
+    setShowDeleteConfirm(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
