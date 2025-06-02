@@ -455,3 +455,34 @@ footer {
   background: linear-gradient(to bottom, #1e88e5, #1565c0);
 }
 
+/* Efecto de flotación para mensajes nuevos */
+@keyframes floatUp {
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mensaje-burbuja:last-child {
+  animation: floatUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Efecto de onda al hacer clic en botones */
+@keyframes wave {
+  0% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0.7); }
+  100% { box-shadow: 0 0 0 10px rgba(66, 165, 245, 0); }
+}
+
+.send-button:active, 
+.edit-btn:active, 
+.delete-btn:active,
+.save-edit-btn:active, 
+.cancel-edit-btn:active,
+.confirm-delete-btn:active, 
+.cancel-delete-btn:active {
+  animation: wave 0.5s;
+}
