@@ -14,6 +14,8 @@ function Chat() {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingMessageContent, setEditingMessageContent] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isSending, setIsSending] = useState(false);
 
   // Crear y conectar socket solo cuando cambia usuario
   useEffect(() => {
@@ -106,40 +108,121 @@ function Chat() {
     };
   }, [socket, usuario, empresaId]);
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (inputMessage.trim() && socket) {
+  //     const messageData = {
+  //       remitente: usuario.id,
+  //       destinatario: empresaId,
+  //       mensaje: inputMessage,
+  //       timestamp: new Date().toISOString(),
+  //     };
+
+  //     setMessages((prevMessages) => [
+  //       ...prevMessages,
+  //       {
+  //         ...messageData,
+  //         isOwn: true,
+  //       },
+  //     ]);
+  //     socket.emit('new chat', messageData);
+  //     setInputMessage('');
+  //   }
+  // };
+
+  // const handleEdit = (msg) => {
+  //   setEditingMessageId(msg.id);
+  //   setEditingMessageContent(msg.mensaje);
+  //   setShowDeleteConfirm(null);
+  // };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (inputMessage.trim() && socket) {
-      const messageData = {
+
+    if (!inputMessage.trim() && !selectedFile) {
+      alert('Debes escribir un mensaje o seleccionar un archivo');
+      return;
+    }
+
+    if (!socket || !empresaId) return;
+
+    setIsSending(true);
+    try {
+      const baseMessage = {
         remitente: usuario.id,
         destinatario: empresaId,
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
       };
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          ...messageData,
-          isOwn: true,
-        },
-      ]);
-      socket.emit('new chat', messageData);
+      if (selectedFile) {
+        if (selectedFile.size > 5 * 1024 * 1024) {
+          alert('El archivo es demasiado grande (máximo 5MB)');
+          return;
+        }
+
+        const fileData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile);
+        });
+
+        const messageWithFile = {
+          ...baseMessage,
+          archivo: {
+            datos: fileData,
+            tipo: selectedFile.type,
+            nombre: selectedFile.name,
+            tamaño: selectedFile.size,
+          }
+        };
+
+        socket.emit('new chat', messageWithFile);
+        setMessages(prev => [...prev, { ...messageWithFile, isOwn: true }]);
+      } else {
+        socket.emit('new chat', baseMessage);
+        setMessages(prev => [...prev, { ...baseMessage, isOwn: true }]);
+      }
+
       setInputMessage('');
+      setSelectedFile(null);
+      document.querySelector('.file-input').value = '';
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error);
+      alert('Error al enviar el archivo');
+    } finally {
+      setIsSending(false);
     }
   };
 
-  const handleEdit = (msg) => {
-    setEditingMessageId(msg.id);
-    setEditingMessageContent(msg.mensaje);
-    setShowDeleteConfirm(null);
+  const downloadFile = (fileData, fileName, fileType) => {
+    const link = document.createElement('a');
+    link.href = fileData;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+
+  ///
 
   const saveEdit = async (msgId) => {
     try {
-      await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, { 
-        mensaje: editingMessageContent 
+      await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, {
+        mensaje: editingMessageContent
       });
-      
+
       setMessages(prev =>
         prev.map(msg =>
           msg.id === msgId ? { ...msg, mensaje: editingMessageContent } : msg
@@ -151,7 +234,7 @@ function Chat() {
       console.error('Error al editar mensaje:', err);
     }
 
-    
+
   };
 
   const cancelEdit = () => {
@@ -183,7 +266,7 @@ function Chat() {
           <p>Cargando...</p>
         )}
       </div>
-      
+
       <div className="body-chat">
         <div className="contenedor">
           <div className="contenedor-chat">
@@ -198,22 +281,45 @@ function Chat() {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                 />
-                <button 
-                  type="submit" 
-                  disabled={!inputMessage.trim()}
+
+                <label className="file-input-label">
+                  <input
+                    type="file"
+                    className="file-input"
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                    accept=".pdf,.doc,.docx,image/*"
+                  />
+                  📎 Adjuntar
+                </label>
+
+                {selectedFile && (
+                  <div className="selected-file-info">
+                    {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFile(null)}
+                      className="remove-file-btn"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={(!inputMessage.trim() && !selectedFile) || isSending}
                   className="send-button"
                 >
-                  📤 Enviar
+                  {isSending ? 'Enviando...' : '📤 Enviar'}
                 </button>
               </form>
-              
+
               <div className="mensajes">
                 {messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`mensaje-burbuja ${
-                      msg.isOwn ? 'derecha' : 'izquierda'
-                    }`}
+                    className={`mensaje-burbuja ${msg.isOwn ? 'derecha' : 'izquierda'
+                      }`}
                   >
                     <div className="mensaje-nombre">
                       <strong>{msg.isOwn ? 'Tú' : nombreEmpresa}</strong>
@@ -224,7 +330,7 @@ function Chat() {
                         })}
                       </span>
                     </div>
-                    
+
                     {editingMessageId === msg.id ? (
                       <div className="edit-message-container">
                         <input
@@ -235,13 +341,13 @@ function Chat() {
                           autoFocus
                         />
                         <div className="edit-actions">
-                          <button 
+                          <button
                             onClick={() => saveEdit(msg.id)}
                             className="save-edit-btn"
                           >
                             Guardar
                           </button>
-                          <button 
+                          <button
                             onClick={cancelEdit}
                             className="cancel-edit-btn"
                           >
@@ -251,42 +357,56 @@ function Chat() {
                       </div>
                     ) : (
                       <>
-                        <div 
-                          className="mensaje-texto" 
+                        <div
+                          className="mensaje-texto"
                           onDoubleClick={() => msg.isOwn && handleEdit(msg)}
                         >
                           {msg.mensaje}
+
+                          {msg.archivo && msg.archivo.nombre && msg.archivo.datos && (
+                            <div className="archivo-adjunto">
+                              <button
+                                onClick={() => downloadFile(msg.archivo.datos, msg.archivo.nombre, msg.archivo.tipo)}
+                                className="download-btn"
+                              >
+                                📄 {msg.archivo.nombre}
+                                {msg.archivo.tamaño && ` - ${formatFileSize(msg.archivo.tamaño)}`}
+                              </button>
+                            </div>
+                          )}
+
                         </div>
-                        
+
                         {msg.isOwn && (
                           <div className="message-actions">
-                            <button 
+                            <button
                               onClick={() => handleEdit(msg)}
                               className="edit-btn"
                               title="Editar mensaje"
                             >
                               ✏️
                             </button>
-                            <button 
+                            <button
                               onClick={() => toggleDeleteConfirm(msg.id)}
                               className="delete-btn"
                               title="Eliminar mensaje"
                             >
+                              🗑️
                             </button>
                           </div>
                         )}
-                        
+
                         {showDeleteConfirm === msg.id && (
                           <div className="delete-confirmation">
                             <p>¿Eliminar este mensaje?</p>
                             <div className="confirmation-buttons">
-                              <button 
+                              <button
                                 onClick={() => handleDelete(msg.id)}
                                 className="confirm-delete-btn"
                               >
                                 Sí
                               </button>
-                              <button 
+                              <button
                                 onClick={() => setShowDeleteConfirm(null)}
                                 className="cancel-delete-btn"
                               >

@@ -4,7 +4,7 @@ import Token from '../assets/funciones/Token';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
-function Chat() {
+function ChatEmpresa() {
   const usuario = Token();
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -19,6 +19,8 @@ function Chat() {
   const [editingMessageContent, setEditingMessageContent] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isSending, setIsSending] = useState(false);
 
   const filteredClients = clients.filter(client =>
     client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -69,7 +71,7 @@ function Chat() {
             ...prev,
             [msg.remitente]: (prev[msg.remitente] || 0) + 1
           }));
-          
+
           // Mostrar notificación del navegador
           if (Notification.permission === 'granted') {
             const sender = clients.find(c => c.id === msg.remitente);
@@ -78,13 +80,13 @@ function Chat() {
             });
           }
         }
-        
+
         // Si estamos en el chat correcto, agregar el mensaje
         if (selectedClient && msg.remitente === selectedClient.id) {
           setMessages(prev => [...prev, { ...msg, isOwn: false }]);
         }
       }
-      
+
       // Si el mensaje es enviado por el usuario actual
       if (msg.remitente === usuario.id && selectedClient && msg.destinatario === selectedClient.id) {
         setMessages(prev => [...prev, { ...msg, isOwn: true }]);
@@ -139,17 +141,17 @@ function Chat() {
   const startNewChat = (client) => {
     // Marcar mensajes como leídos al abrir el chat
     setUnreadMessages(prev => {
-      const newUnread = {...prev};
+      const newUnread = { ...prev };
       delete newUnread[client.id];
       return newUnread;
     });
-    
+
     setSelectedClient(client);
     setMessages([]);
     setNewChatModal(false);
     setEditingMessageId(null);
     setShowDeleteConfirm(null);
-    
+
     // Cargar mensajes del chat seleccionado
     if (usuario) {
       const fetchMessages = async () => {
@@ -169,19 +171,81 @@ function Chat() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (inputMessage.trim() && socket && selectedClient) {
-      const messageData = {
+
+    if (!inputMessage.trim() && !selectedFile) {
+      alert('Debes escribir un mensaje o seleccionar un archivo');
+      return;
+    }
+
+    if (!socket || !selectedClient) return;
+    setIsSending(true);
+    try {
+      const baseMessage = {
         remitente: usuario.id,
         destinatario: selectedClient.id,
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
       };
-      socket.emit('new chat', messageData);
-      setMessages(prev => [...prev, { ...messageData, isOwn: true }]);
+
+      if (selectedFile) {
+        if (selectedFile.size > 5 * 1024 * 1024) {
+          alert('El archivo es demasiado grande (máximo 5MB)');
+          return;
+        }
+
+        const fileData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile);
+        });
+
+        const messageWithFile = {
+          ...baseMessage,
+          archivo: {
+            datos: fileData,
+            tipo: selectedFile.type,
+            nombre: selectedFile.name,
+            tamaño: selectedFile.size,
+          }
+        };
+
+        socket.emit('new chat', messageWithFile);
+        setMessages(prev => [...prev, { ...messageWithFile, isOwn: true }]);
+      } else {
+        socket.emit('new chat', baseMessage);
+        setMessages(prev => [...prev, { ...baseMessage, isOwn: true }]);
+      }
+
       setInputMessage('');
+      setSelectedFile(null);
+      document.querySelector('.file-input').value = '';
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error);
+      alert('Error al enviar el archivo');
+    } finally {
+      setIsSending(false);
     }
+  };
+
+  const downloadFile = (fileData, fileName, fileType) => {
+    const link = document.createElement('a');
+    link.href = fileData;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const handleEdit = (msg) => {
@@ -192,10 +256,10 @@ function Chat() {
 
   const saveEdit = async (msgId) => {
     try {
-      await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, { 
-        mensaje: editingMessageContent 
+      await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, {
+        mensaje: editingMessageContent
       });
-      
+
       setMessages(prev =>
         prev.map(msg =>
           msg.id === msgId ? { ...msg, mensaje: editingMessageContent } : msg
@@ -244,7 +308,7 @@ function Chat() {
         <div className="contacts-panel">
           <div className="contacts-header">
             <h2>Clientes</h2>
-            <button 
+            <button
               onClick={() => setNewChatModal(true)}
               className="new-chat-btn"
             >
@@ -314,13 +378,13 @@ function Chat() {
                               autoFocus
                             />
                             <div className="edit-actions">
-                              <button 
+                              <button
                                 onClick={() => saveEdit(msg.id)}
                                 className="save-edit-btn"
                               >
                                 Guardar
                               </button>
-                              <button 
+                              <button
                                 onClick={cancelEdit}
                                 className="cancel-edit-btn"
                               >
@@ -332,6 +396,20 @@ function Chat() {
                           <>
                             <div className="message-text" onDoubleClick={() => msg.isOwn && handleEdit(msg)}>
                               {msg.mensaje}
+
+
+                              {msg.archivo && msg.archivo.nombre && msg.archivo.datos && (
+                                <div className="archivo-adjunto">
+                                  <button
+                                    onClick={() => downloadFile(msg.archivo.datos, msg.archivo.nombre, msg.archivo.tipo)}
+                                    className="download-btn"
+                                  >
+                                    📄 {msg.archivo.nombre}
+                                    {msg.archivo.tamaño && ` - ${formatFileSize(msg.archivo.tamaño)}`}
+                                  </button>
+                                </div>
+                              )}
+
                             </div>
                             <div className="message-footer">
                               <span className="message-time">
@@ -342,14 +420,14 @@ function Chat() {
                               </span>
                               {msg.isOwn && (
                                 <div className="message-actions">
-                                  <button 
+                                  <button
                                     onClick={() => handleEdit(msg)}
                                     className="edit-btn"
                                     title="Editar mensaje"
                                   >
                                     ✏️
                                   </button>
-                                  <button 
+                                  <button
                                     onClick={() => toggleDeleteConfirm(msg.id)}
                                     className="delete-btn"
                                     title="Eliminar mensaje"
@@ -363,13 +441,13 @@ function Chat() {
                               <div className="delete-confirmation">
                                 <p>¿Eliminar este mensaje?</p>
                                 <div className="confirmation-buttons">
-                                  <button 
+                                  <button
                                     onClick={() => handleDelete(msg.id)}
                                     className="confirm-delete-btn"
                                   >
                                     Sí
                                   </button>
-                                  <button 
+                                  <button
                                     onClick={() => setShowDeleteConfirm(null)}
                                     className="cancel-delete-btn"
                                   >
@@ -394,8 +472,36 @@ function Chat() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   className="message-input"
                 />
-                <button type="submit" className="send-btn">
-                  Enviar
+
+                <label className="file-input-label">
+                  <input
+                    type="file"
+                    className="file-input"
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                    accept=".pdf,.doc,.docx,image/*"
+                  />
+                  📎 Adjuntar
+                </label>
+
+                {selectedFile && (
+                  <div className="selected-file-info">
+                    {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFile(null)}
+                      className="remove-file-btn"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={(!inputMessage.trim() && !selectedFile) || isSending}
+                  className="send-button"
+                >
+                  {isSending ? 'Enviando...' : '📤 Enviar'}
                 </button>
               </form>
             </>
@@ -403,7 +509,7 @@ function Chat() {
             <div className="no-chat-selected">
               <h2>Selecciona un cliente para chatear</h2>
               <p>O inicia una nueva conversación</p>
-              <button 
+              <button
                 onClick={() => setNewChatModal(true)}
                 className="start-chat-btn"
               >
@@ -419,7 +525,7 @@ function Chat() {
           <div className="new-chat-modal">
             <div className="modal-header">
               <h2>Nuevo chat</h2>
-              <button 
+              <button
                 onClick={() => setNewChatModal(false)}
                 className="close-modal-btn"
               >
@@ -438,9 +544,9 @@ function Chat() {
             <div className="client-list">
               {filteredClients.length > 0 ? (
                 filteredClients.map((client) => (
-                  <div 
-                    key={client.id} 
-                    className="client-item" 
+                  <div
+                    key={client.id}
+                    className="client-item"
                     onClick={() => startNewChat(client)}
                   >
                     <div className="client-avatar">{client.nombre.charAt(0)}</div>
@@ -467,4 +573,4 @@ function Chat() {
   );
 }
 
-export default Chat;
+export default ChatEmpresa;

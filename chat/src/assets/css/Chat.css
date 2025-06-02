@@ -497,3 +497,70 @@ footer {
   font-size: 12px;
   margin-left: 8px;
 }
+
+/* Agrega esto a tu Chat.css */
+.file-input-label {
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background 0.3s;
+}
+
+.file-input-label:hover {
+  background: #e0e0e0;
+}
+
+.file-input {
+  display: none;
+}
+
+.selected-file-info {
+  margin: 8px 0;
+  padding: 8px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 8px;
+}
+
+.archivo-adjunto {
+  margin-top: 8px;
+  padding: 8px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  border: 1px dashed #ccc;
+}
+
+.download-btn {
+  background: none;
+  border: none;
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.download-btn:hover {
+  color: #004499;
+}
+
+/* Estilo para el botón de enviar cuando está deshabilitado */
+.send-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

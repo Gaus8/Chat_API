@@ -24,7 +24,7 @@ function Grafico({ productos }) {
         <XAxis dataKey="nombre" interval={0} angle={-30} textAnchor="end" height={60} />
         <YAxis ticks={ticks} domain={[0, maxTick]} />
         <Tooltip />
-        <Bar dataKey="cantidad" fill="#8884d8" />
+        <Bar dataKey="cantidad" fill="#3498db" />
       </BarChart>
     </div>
   );
