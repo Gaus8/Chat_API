@@ -138,6 +138,16 @@ function ChatEmpresa() {
     fetchMessages();
   }, [selectedClient, usuario]);
 
+ const handleReporte =  async () =>{
+    try{
+     const response =  await axios.get(`http://localhost:3000/api/reportes/${usuario.id}/${selectedClient.id}`);
+     window.alert(response.data?.message);
+    }
+    catch (err) {
+        console.error('Error al cargar mensajes:', err);
+      }
+  }
+
   const startNewChat = (client) => {
     // Marcar mensajes como leídos al abrir el chat
     setUnreadMessages(prev => {
@@ -296,6 +306,7 @@ function ChatEmpresa() {
   if (!usuario) {
     return <div className="loading">Cargando usuario...</div>;
   }
+
 
   return (
     <div className="chat-empresarial">
@@ -502,6 +513,14 @@ function ChatEmpresa() {
                   className="send-button"
                 >
                   {isSending ? 'Enviando...' : '📤 Enviar'}
+                </button>
+
+                <button
+                  type="button"
+                  className="send-button"
+                  onClick={handleReporte}
+                >
+                  Generar Reporte
                 </button>
               </form>
             </>
