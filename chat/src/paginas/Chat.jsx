@@ -157,10 +157,10 @@ function Chat() {
         };
 
         socket.emit('new chat', messageWithFile);
-        setMessages(prev => [...prev, { ...messageWithFile, isOwn: true }]);
+       
       } else {
         socket.emit('new chat', baseMessage);
-        setMessages(prev => [...prev, { ...baseMessage, isOwn: true }]);
+  
       }
 
       setInputMessage('');
@@ -230,11 +230,10 @@ function Chat() {
     }
   };
 
-  const toggleDeleteConfirm = (msgId) => {
+    const toggleDeleteConfirm = (msgId) => {
     setShowDeleteConfirm(showDeleteConfirm === msgId ? null : msgId);
     setEditingMessageId(null);
   };
-
   return (
     <>
       <div className="chat-header">
