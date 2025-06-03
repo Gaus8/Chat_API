@@ -31,10 +31,7 @@ function MenuPrincipal() {
             try {
                 const response = await axios.get(`http://localhost:3000/api/estadisticas/${usuario.id}/683dac1084b6bf73c7d780b0`)
                 if (response.status === 200) {
-                        const productosFormateados = Object.entries(response.data).map(([nombre, cantidad]) => ({
-                    nombre,
-                    cantidad,
-                }));
+                        const productosFormateados = response.data;
                 setProductos(productosFormateados);
                     
                 }
