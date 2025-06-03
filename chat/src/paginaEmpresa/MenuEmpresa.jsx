@@ -1,11 +1,13 @@
 import '../assets/css/MenuPrincipal.css';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import axios from 'axios';
 import Token from '../assets/funciones/Token';
+import GraficosUsuarios from './GraficosUsuarios';
+
 function MenuEmpresa() {
 
     const usuario = Token()
-
+    const [usuarios, setUsuarios] = useState([]);
     const [openMenu, setOpenMenu] = useState(false);
 
     const toggleMenu = () => setOpenMenu(!openMenu);
@@ -20,7 +22,34 @@ function MenuEmpresa() {
             console.error("Error al cerrar sesión:", err);
         }
     };
+
+       useEffect(() => {
+        const consultarUsuariosMensajes = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/graficos`)
+                if (response.status === 200) {
+                        const usuariosFormateados = response.data;
+                setUsuarios(usuariosFormateados);
+                    
+                }
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
+         if (usuario?.id) {
+        consultarUsuariosMensajes();
+    }
+      
+    },[usuario])
+
+  useEffect(() => {
+  console.log("Productos actualizados:", usuarios);
+}, [usuarios]); // solo cuando productos cambia
+
+
    return (
+    <>
         <header className="menu-header">
             <div className="logo-container">
                 <img src="img/flecha.png" alt="Logo" className="logo" />
@@ -55,6 +84,9 @@ function MenuEmpresa() {
                 </div>
             </div>
         </header>
+        <GraficosUsuarios usuarios={usuarios}/>
+
+        </>
     );
  
 }
