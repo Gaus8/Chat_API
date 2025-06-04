@@ -3,9 +3,9 @@ import '../assets/css/Graficos.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Token from '../assets/funciones/Token';
-import GraficoBarras from './GraficoBarras';
-import GraficoPuntos from './GraficoPuntos';
-import GraficoPastel from './GraficoPastel';
+import GraficoBarras from '../graficos/GraficoBarras';
+import GraficoPuntos from '../graficos/GraficoPuntos';
+import GraficoPastel from '../graficos/GraficoPastel';
 function MenuEmpresa() {
 
     const usuario = Token()
@@ -88,10 +88,6 @@ function MenuEmpresa() {
         }
 
     }, [usuario])
-
-    useEffect(() => {
-        console.log("Productos actualizados:", productos);
-    }, [productos]); // solo cuando productos cambia
 
 
 

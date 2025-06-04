@@ -6,6 +6,7 @@ import axios from "axios";
 
 
 function Login() {
+  const[error, setError] = useState('')
   const [data, setData] = useState({
     email: "",
     password: ""
@@ -42,8 +43,8 @@ function Login() {
       }
       
     } catch (err) {
-      const errorData = err.response?.data;
-      console.log(errorData)
+      const errorData = err.response?.data.message;
+      setError(errorData)
     }
   }
   return (
@@ -82,7 +83,7 @@ function Login() {
               </div>
 
               <div className="message-error">
-                <p id="error-login"></p>
+                <p id="error-login">{error}</p>
               </div>
 
               <a href="/recuperar_password">¿Olvidaste tu contraseña?</a>
