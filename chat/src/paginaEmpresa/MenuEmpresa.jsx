@@ -1,4 +1,5 @@
 import '../assets/css/MenuPrincipal.css';
+import '../assets/css/Graficos.css';
 import { useState,useEffect } from 'react';
 import axios from 'axios';
 import Token from '../assets/funciones/Token';
@@ -84,7 +85,20 @@ function MenuEmpresa() {
                 </div>
             </div>
         </header>
-        <GraficosUsuarios usuarios={usuarios}/>
+        <div className="contenedor-graficos">
+            <div>
+                <h3>Cantidad de Mensajes de Usuarios</h3>
+              <GraficosUsuarios usuarios={usuarios}/>
+            </div>
+            
+         <div>
+                <h3>Cantidad de Mensajes de Usuarios</h3>
+              <GraficosUsuarios usuarios={usuarios}/>
+            </div>
+        </div>
+       
+       
+      
 
         </>
     );
