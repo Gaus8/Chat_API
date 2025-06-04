@@ -3,16 +3,19 @@ import '../assets/css/Graficos.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Token from '../assets/funciones/Token';
-import GraficosUsuarios from './GraficosUsuarios';
-
+import GraficoBarras from './GraficoBarras';
+import GraficoPuntos from './GraficoPuntos';
+import GraficoPastel from './GraficoPastel';
 function MenuEmpresa() {
 
     const usuario = Token()
     const [usuarios, setUsuarios] = useState([]);
+    const [mensajes, setMensajes] = useState([]);
+    const [productos, setProductos] = useState([]);
     const [openMenu, setOpenMenu] = useState(false);
 
     const toggleMenu = () => setOpenMenu(!openMenu);
-
+    //Metodo POST para limpiar las cookies y hacer el LogOut
     const handleLogout = async () => {
         try {
             await axios.post('http://localhost:3000/api/logout', {}, {
@@ -23,7 +26,7 @@ function MenuEmpresa() {
             console.error("Error al cerrar sesión:", err);
         }
     };
-
+    //Metodo para devolver la cantidad de mensajes escritos en el sistema por un usuario
     useEffect(() => {
         const consultarUsuariosMensajes = async () => {
             try {
@@ -43,10 +46,54 @@ function MenuEmpresa() {
         }
 
     }, [usuario])
+    //Metodo para devolver la cantidad de mensajes escritos en el sistema por un usuario
 
     useEffect(() => {
-        console.log("Productos actualizados:", usuarios);
-    }, [usuarios]); // solo cuando productos cambia
+        const consultarMensajesDiarios = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/api/graficos_mensajes_diarios')
+                if (response.status === 200) {
+                    const mensajesFormateados = response.data;
+                    setMensajes(mensajesFormateados);
+
+                }
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
+        if (usuario?.id) {
+            consultarMensajesDiarios();
+        }
+
+    }, [usuario])
+
+
+    useEffect(() => {
+        const consultarProductos = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/api/graficos_productos')
+                if (response.status === 200) {
+                    const productosFormateados = response.data;
+                    setProductos(productosFormateados);
+
+                }
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
+        if (usuario?.id) {
+            consultarProductos();
+        }
+
+    }, [usuario])
+
+    useEffect(() => {
+        console.log("Productos actualizados:", productos);
+    }, [productos]); // solo cuando productos cambia
+
+
 
 
     return (
@@ -88,12 +135,22 @@ function MenuEmpresa() {
             <div className="contenedor-graficos">
                 <div>
                     <h3 className='titulos-graficos'>Cantidad de Mensajes de Usuarios</h3>
-                    <GraficosUsuarios usuarios={usuarios}  />
+                    <GraficoBarras usuarios={usuarios} />
                 </div>
 
+
                 <div>
-                    <GraficosUsuarios usuarios={usuarios} />
+                    <h3 className='titulos-graficos'>Mensajes Diarios</h3>
+                    <GraficoPuntos mensajes={mensajes} />
                 </div>
+
+
+                   <div>
+                    <h3 className='titulos-graficos'>Productos Solicitados</h3>
+                        <GraficoPastel productos={productos}/>
+                </div>
+            
+
             </div>
 
 

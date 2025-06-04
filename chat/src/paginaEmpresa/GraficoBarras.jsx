@@ -2,7 +2,7 @@
 import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 
 
-function GraficosUsuarios({ usuarios, titulo="" }) {
+function GraficoBarras({ usuarios, titulo="" }) {
   // Calculamos el valor máximo de cantidad para definir el dominio
   const maxCantidad = Math.max(...usuarios.map(p => p.cantidad));
 
@@ -29,4 +29,4 @@ function GraficosUsuarios({ usuarios, titulo="" }) {
   );
 }
 
-export default GraficosUsuarios;
+export default GraficoBarras;
