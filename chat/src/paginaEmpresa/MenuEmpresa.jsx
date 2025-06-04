@@ -26,7 +26,7 @@ function MenuEmpresa() {
        useEffect(() => {
         const consultarUsuariosMensajes = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/api/graficos`)
+                const response = await axios.get('http://localhost:3000/api/graficos_mensajes_usuario')
                 if (response.status === 200) {
                         const usuariosFormateados = response.data;
                 setUsuarios(usuariosFormateados);
