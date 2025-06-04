@@ -9,8 +9,7 @@ import Validacion from "./usuario/Validacion"
 import RecuperarPassword from "./usuario/RecuperarPassword"
 import RestablecerPassword from "./usuario/RestablecerPassword"
 import ChatEmpresa from "./paginaEmpresa/ChatEmpresa"
-import MenuEmpresa from "./paginaEmpresa/MenuEmpresa"
-import Grafico from "./paginas/Graficos"
+import MenuEmpresa from "./paginaEmpresa/MenuEmpresa" 
 
 function App() {
   const router = createBrowserRouter([
@@ -25,7 +24,6 @@ function App() {
     {path:'/restablecer_password/:token', element:<RestablecerPassword />},
     {path:'/chat_empresa', element:<ChatEmpresa />},
     {path:'/main_empresa', element:<MenuEmpresa />},
-    {path:'/graficos', element:<Grafico />},
   
   ])
   return (

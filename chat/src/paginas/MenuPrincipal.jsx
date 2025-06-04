@@ -1,14 +1,16 @@
 import '../assets/css/MenuPrincipal.css';
+
 import { useState } from 'react';
 import axios from 'axios';
 import Token from '../assets/funciones/Token';
-import Grafico from './Graficos';
+import GraficosUsuarios from '../graficos/GraficosUsuarios';
+import GraficoPuntos from '../graficos/GraficoPuntos';
 import { useEffect } from 'react';
 
 function MenuPrincipal() {
 
     const [productos, setProductos] = useState([]);
-
+    const [mensajes, setMensajes] = useState([]);
     const usuario = Token()
 
     const [openMenu, setOpenMenu] = useState(false);
@@ -25,7 +27,7 @@ function MenuPrincipal() {
             console.error("Error al cerrar sesión:", err);
         }
     };
-
+//Consultar productos pedidos por un usuario especifico
     useEffect(() => {
         const consultarProductos = async () => {
             try {
@@ -45,10 +47,27 @@ function MenuPrincipal() {
     }
       
     },[usuario])
+  //Metodo para devolver la cantidad de mensajes escritos en el sistema por un usuario
 
-  useEffect(() => {
-  console.log("Productos actualizados:", productos);
-}, [productos]); // solo cuando productos cambia
+    useEffect(() => {
+        const consultarMensajesDiarios = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/graficos_mensajes_diarios/${usuario.id}`)
+                if (response.status === 200) {
+                    const mensajesFormateados = response.data;
+                    setMensajes(mensajesFormateados);
+
+                }
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
+        if (usuario?.id) {
+            consultarMensajesDiarios();
+        }
+
+    }, [usuario])
 
 return (
     <>
@@ -86,9 +105,16 @@ return (
                 </div>
             </div>
         </header>
-        <Grafico 
-            productos={productos}
-        />
+         <div className="contenedor-graficos">
+                <div>
+                    <h3 className='titulos-graficos'>Pedido de Productos</h3>
+                    <GraficosUsuarios productos={productos} />
+                </div>
+                 <div>
+                    <h3 className='titulos-graficos'>Pedido de Productos</h3>
+                    <GraficoPuntos mensajes={mensajes}/>
+                </div>
+        </div>
     </>
 );
  

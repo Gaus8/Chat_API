@@ -3,7 +3,7 @@ import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 
 import React from 'react';
 
-function Grafico({ productos }) {
+function GraficosUsuarios ({ productos }) {
   // Calculamos el valor máximo de cantidad para definir el dominio
   const maxCantidad = Math.max(...productos.map(p => p.cantidad));
 
@@ -18,7 +18,6 @@ function Grafico({ productos }) {
 
   return (
     <div>
-      <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>Productos y Cantidades</h2>
       <BarChart width={300} height={300} data={productos}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="nombre" interval={0} angle={-30} textAnchor="end" height={60} />
@@ -30,4 +29,4 @@ function Grafico({ productos }) {
   );
 }
 
-export default Grafico;
+export default GraficosUsuarios;
