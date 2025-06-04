@@ -2,7 +2,7 @@
 import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 
 
-function GraficosUsuarios({ usuarios }) {
+function GraficosUsuarios({ usuarios, titulo="" }) {
   // Calculamos el valor máximo de cantidad para definir el dominio
   const maxCantidad = Math.max(...usuarios.map(p => p.cantidad));
 
@@ -17,10 +17,10 @@ function GraficosUsuarios({ usuarios }) {
 
   return (
     <div>
-      <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>Usuarios y Mensajes</h2>
+     
       <BarChart width={300} height={300} data={usuarios}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="nombre" interval={0} angle={-30} textAnchor="end" height={60} />
+        <XAxis dataKey="nombre" interval={0} angle={-30} textAnchor="end" height={90} />
         <YAxis ticks={ticks} domain={[0, maxTick]} />
         <Tooltip />
         <Bar dataKey="cantidadMensajes" fill="#3498db" />

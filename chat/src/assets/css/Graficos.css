@@ -1,6 +1,13 @@
 .contenedor-graficos{
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-direction: row;
+    margin-top: 20px;
+    gap: 20px;
+}
+
+.titulos-graficos{
+    text-align: center;
+    font-size: 20px;
+    color:rgb(213, 56, 17)
+
 }
