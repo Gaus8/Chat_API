@@ -1,4 +1,3 @@
-
 //Importacion de dependencias de la libreria Recharts
 import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 
@@ -16,7 +15,7 @@ function GraficoBarras({ usuarios}) {
     ticks.push(i);
   }
 
-  //Se retorna los graficos, en este caso se usan dos datakey, los cuales son el nombre del usuario y la cantidad de mensajes
+  //Se renderiza el grafico, en este caso se usan dos datakey, los cuales son el nombre del usuario y la cantidad de mensajes
   return (
     <div>
      

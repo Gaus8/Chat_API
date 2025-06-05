@@ -1,12 +1,15 @@
 //Importacion de dependencias de la libreria Recharts
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+//Se pasa como props los mensajes, los cuales se buscan desde el backend
 function GraficoPuntos({ mensajes }) {
+  //Se busca la cantidad maxima de mensajes, para poder generar los intervalos
   const maxCantidad = Math.max(...mensajes.map(p => p.cantidadMensajes));
   const maxTick = Math.ceil(maxCantidad / 5) * 5;
   const ticks = [];
   for (let i = 0; i <= maxTick; i += 5) ticks.push(i);
 
+  //Renderizado del grafico
   return (
     <div>
       <LineChart width={500} height={300} data={mensajes}>
