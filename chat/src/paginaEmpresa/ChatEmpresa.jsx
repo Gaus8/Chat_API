@@ -1,3 +1,4 @@
+//Librerias importadas
 import { useEffect, useState } from 'react';
 import '../assets/css/ChatEmpresa.css';
 import Token from '../assets/funciones/Token';
@@ -5,28 +6,30 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 
 function ChatEmpresa() {
-  const usuario = Token();
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [newChatModal, setNewChatModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [onlineStatus, setOnlineStatus] = useState({});
-  const [editingMessageId, setEditingMessageId] = useState(null);
-  const [editingMessageContent, setEditingMessageContent] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-  const [unreadMessages, setUnreadMessages] = useState({});
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isSending, setIsSending] = useState(false);
+  const usuario = Token(); //Datos del usuario recopilados a traves del token
+  const [socket, setSocket] = useState(null); // Estados para la conexion con el socket.io
+  const [messages, setMessages] = useState([]); // Estados para los mensajes del chat
+  const [inputMessage, setInputMessage] = useState('');// Estados para enviar los mensajes 
+  const [clients, setClients] = useState([]); //Estados para la lista de clientes registrados
+  const [selectedClient, setSelectedClient] = useState(null); //Estados para seleccionar un cliente especifio
+  const [isLoading, setIsLoading] = useState(true); //Estados para el estado de carga
+  const [newChatModal, setNewChatModal] = useState(false);// Estados para el despliegue del chat
+  const [searchTerm, setSearchTerm] = useState(''); // Estados para la busqueda de usuarios
+  const [onlineStatus, setOnlineStatus] = useState({});// Estados para el estado online del usuario
+  const [editingMessageId, setEditingMessageId] = useState(null); // Estados para editar un mensaje especifico
+  const [editingMessageContent, setEditingMessageContent] = useState(''); // Estados para editar el contenido de un mensaje especifico
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);// Estados para el menu de confirmacion
+  const [unreadMessages, setUnreadMessages] = useState({}); //Estados para las alertas de notificacion
+  const [selectedFile, setSelectedFile] = useState(null); // Estados para seleccionar un archivo
+  const [isSending, setIsSending] = useState(false); // Estados para cambiar enter enviado y enviando...
 
+//Filtrado de clientes (usuarios) con el nombre y el email
   const filteredClients = clients.filter(client =>
     client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Funcion para la conexion del socket de manera local
   useEffect(() => {
     if (!usuario) return;
     const newSocket = io('http://localhost:3000');
@@ -39,6 +42,7 @@ function ChatEmpresa() {
       });
     });
 
+    // Funcion para buscar los usuarios conectados
     newSocket.on('usuarios conectados', (usuariosConectados) => {
       const statusMap = {};
       usuariosConectados.forEach(user => {
@@ -58,15 +62,16 @@ function ChatEmpresa() {
     };
   }, [usuario]);
 
+  //Funcion para el control de nuevos mensajes
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (msg) => {
-      // Si el mensaje es para el usuario actual
+
       if (msg.destinatario === usuario.id) {
-        // Si el mensaje no viene del chat actualmente seleccionado
+
         if (!selectedClient || msg.remitente !== selectedClient.id) {
-          // Incrementar el contador de mensajes no leídos
+         
           setUnreadMessages(prev => ({
             ...prev,
             [msg.remitente]: (prev[msg.remitente] || 0) + 1
@@ -80,23 +85,23 @@ function ChatEmpresa() {
             });
           }
         }
-
-        // Si estamos en el chat correcto, agregar el mensaje
         if (selectedClient && msg.remitente === selectedClient.id) {
           setMessages(prev => [...prev, { ...msg, isOwn: false }]);
         }
       }
 
-      // Si el mensaje es enviado por el usuario actual
       if (msg.remitente === usuario.id && selectedClient && msg.destinatario === selectedClient.id) {
         setMessages(prev => [...prev, { ...msg, isOwn: true }]);
       }
     };
 
+    //Emision de un nuevo mensaje
+
     socket.on('new chat', handleNewMessage);
     return () => socket.off('new chat', handleNewMessage);
   }, [socket, selectedClient, usuario, clients]);
-
+  
+  //Permiso para el envio de notificaciones
   useEffect(() => {
     if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
       Notification.requestPermission().then(permission => {
@@ -105,6 +110,7 @@ function ChatEmpresa() {
     }
   }, []);
 
+  //Funcion para consultar los usuarios registrados en la base de datos
   useEffect(() => {
     if (!usuario) return;
     const fetchClients = async () => {
@@ -120,7 +126,8 @@ function ChatEmpresa() {
     fetchClients();
   }, [usuario]);
 
-  useEffect(() => {
+//Funcion para consultar los mensajes de un chat especifico
+  function consultarNuevosMensajes() {
     if (!selectedClient || !usuario) return;
     const fetchMessages = async () => {
       try {
@@ -136,18 +143,25 @@ function ChatEmpresa() {
       }
     };
     fetchMessages();
+  };
+
+//Llamado de la consulta de los mensajes
+  useEffect(() => {
+    consultarNuevosMensajes();
   }, [selectedClient, usuario]);
 
- const handleReporte =  async () =>{
-    try{
-     const response =  await axios.get(`http://localhost:3000/api/reportes/${usuario.id}/${selectedClient.id}`);
-     window.alert(response.data?.message);
+  //Funcion para crear un reporte
+  const handleReporte = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/reportes/${usuario.id}/${selectedClient.id}`);
+      window.alert(response.data?.message);
     }
     catch (err) {
-        console.error('Error al cargar mensajes:', err);
-      }
+      console.error('Error al cargar mensajes:', err);
+    }
   }
 
+  //Funcion para iniciar un nuevo chat
   const startNewChat = (client) => {
     // Marcar mensajes como leídos al abrir el chat
     setUnreadMessages(prev => {
@@ -156,31 +170,15 @@ function ChatEmpresa() {
       return newUnread;
     });
 
+    //Limpiar Estados
     setSelectedClient(client);
     setMessages([]);
     setNewChatModal(false);
     setEditingMessageId(null);
     setShowDeleteConfirm(null);
+  }
 
-    // Cargar mensajes del chat seleccionado
-    if (usuario) {
-      const fetchMessages = async () => {
-        try {
-          const res = await axios.get(`http://localhost:3000/api/mensajes/${usuario.id}/${client.id}`);
-          const mensajesBD = res.data.mensajes.map(msg => ({
-            ...msg,
-            id: msg._id,
-            isOwn: msg.remitente === usuario.id,
-          }));
-          setMessages(mensajesBD);
-        } catch (err) {
-          console.error('Error al cargar mensajes:', err);
-        }
-      };
-      fetchMessages();
-    }
-  };
-
+  //Funcion para el envio de mensajes
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -189,6 +187,7 @@ function ChatEmpresa() {
       return;
     }
 
+    //Mensaje base, sin documento
     if (!socket || !selectedClient) return;
     setIsSending(true);
     try {
@@ -198,7 +197,7 @@ function ChatEmpresa() {
         mensaje: inputMessage,
         timestamp: new Date().toISOString(),
       };
-
+    //Mensaje con documento (pdf)
       if (selectedFile) {
         if (selectedFile.size > 5 * 1024 * 1024) {
           alert('El archivo es demasiado grande (máximo 5MB)');
@@ -238,8 +237,10 @@ function ChatEmpresa() {
     } finally {
       setIsSending(false);
     }
+    consultarNuevosMensajes();
   };
 
+  //Funcion para descargar archivos pdf
   const downloadFile = (fileData, fileName, fileType) => {
     const link = document.createElement('a');
     link.href = fileData;
@@ -250,6 +251,7 @@ function ChatEmpresa() {
     document.body.removeChild(link);
   };
 
+  // Funcion para mostrar el tamaño especifico del documento pdf
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -258,12 +260,14 @@ function ChatEmpresa() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  //Funcion para poder editar un mensaje, se pasa como argumento el mensaje.
   const handleEdit = (msg) => {
     setEditingMessageId(msg.id);
     setEditingMessageContent(msg.mensaje);
     setShowDeleteConfirm(null);
   };
 
+  //Funcion para guardar la edicion de un mensaje, se hace un llamado al backend con un PATCH, para actualizar el mensaje.
   const saveEdit = async (msgId) => {
     try {
       await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, {
@@ -282,12 +286,14 @@ function ChatEmpresa() {
     }
   };
 
+  //Funcion para cancelar la edicion, se desactiva el menu desplegable
   const cancelEdit = () => {
     setEditingMessageId(null);
     setEditingMessageContent('');
     setShowDeleteConfirm(null);
   };
 
+  //Funcion para eliminar un mensaje, se hace llamado al backend con un DELETE.
   const handleDelete = async (msgId) => {
     try {
       await axios.delete(`http://localhost:3000/api/mensajes/${msgId}`);
@@ -298,6 +304,7 @@ function ChatEmpresa() {
     }
   };
 
+  //Menu desplegable para la confirmacion de la eliminacion
   const toggleDeleteConfirm = (msgId) => {
     setShowDeleteConfirm(showDeleteConfirm === msgId ? null : msgId);
     setEditingMessageId(null);
@@ -307,14 +314,13 @@ function ChatEmpresa() {
     return <div className="loading">Cargando usuario...</div>;
   }
 
-
+  //Renderizado de la pagina, con todos los elementos
   return (
     <div className="chat-empresarial">
       <header className="chat-header">
         <h1>Chat Empresarial - {usuario.nombre}</h1>
         <p>Conecta con tus clientes en tiempo real</p>
       </header>
-
       <div className="chat-container">
         <div className="contacts-panel">
           <div className="contacts-header">
