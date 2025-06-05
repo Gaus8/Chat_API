@@ -1,3 +1,4 @@
+//Importacion de librerias y funciones
 import '../assets/css/MenuPrincipal.css';
 import '../assets/css/Graficos.css';
 import { useState, useEffect } from 'react';
@@ -6,15 +7,16 @@ import Token from '../assets/funciones/Token';
 import GraficoBarras from '../graficos/GraficoBarras';
 import GraficoPuntos from '../graficos/GraficoPuntos';
 import GraficoPastel from '../graficos/GraficoPastel';
-function MenuEmpresa() {
 
+function MenuEmpresa() {
     const usuario = Token()
-    const [usuarios, setUsuarios] = useState([]);
-    const [mensajes, setMensajes] = useState([]);
-    const [productos, setProductos] = useState([]);
+    const [usuarios, setUsuarios] = useState([]); //Estados para guardar los usuarios
+    const [mensajes, setMensajes] = useState([]); //Estados para guardar la cantidad de mensajes enviadas
+    const [productos, setProductos] = useState([]); //Estados para consultar la cantidad de productos pedidas
     const [openMenu, setOpenMenu] = useState(false);
 
     const toggleMenu = () => setOpenMenu(!openMenu);
+
     //Metodo POST para limpiar las cookies y hacer el LogOut
     const handleLogout = async () => {
         try {
@@ -26,7 +28,8 @@ function MenuEmpresa() {
             console.error("Error al cerrar sesión:", err);
         }
     };
-    //Metodo para devolver la cantidad de mensajes escritos en el sistema por un usuario
+
+    //Metodo para consultar y almacenar la cantidad de mensajes escritos en el sistema por un usuario
     useEffect(() => {
         const consultarUsuariosMensajes = async () => {
             try {
@@ -46,8 +49,8 @@ function MenuEmpresa() {
         }
 
     }, [usuario])
-    //Metodo para devolver la cantidad de mensajes escritos en el sistema por un usuario
 
+    //Metodo para consultar y almacenar la cantidad de mensajes escritos en el sistema por un usuario
     useEffect(() => {
         const consultarMensajesDiarios = async () => {
             try {
@@ -68,7 +71,7 @@ function MenuEmpresa() {
 
     }, [usuario])
 
-
+    //Metodo para consultar y almacenar la cantidad de productos
     useEffect(() => {
         const consultarProductos = async () => {
             try {
@@ -88,10 +91,8 @@ function MenuEmpresa() {
         }
 
     }, [usuario])
-
-
-
-
+    
+    //Renderizado de la pagina empresa
     return (
         <>
             <header className="menu-header">
@@ -109,7 +110,6 @@ function MenuEmpresa() {
                 <div className="actions">
                     <button className="notifications">
                         🔔
-                        {/* Aquí podrías colocar un contador de notificaciones */}
                     </button>
 
                     <div className="user-menu">
@@ -128,30 +128,25 @@ function MenuEmpresa() {
                     </div>
                 </div>
             </header>
+            
             <div className="contenedor-graficos">
                 <div>
                     <h3 className='titulos-graficos'>Cantidad de Mensajes de Usuarios</h3>
                     <GraficoBarras usuarios={usuarios} />
                 </div>
 
-
                 <div>
                     <h3 className='titulos-graficos'>Mensajes Diarios</h3>
                     <GraficoPuntos mensajes={mensajes} />
                 </div>
 
-
-                   <div>
+                <div>
                     <h3 className='titulos-graficos'>Productos Solicitados</h3>
-                        <GraficoPastel productos={productos}/>
+                    <GraficoPastel productos={productos} />
                 </div>
-            
+
 
             </div>
-
-
-
-
         </>
     );
 
