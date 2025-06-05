@@ -1,8 +1,9 @@
 
+//Importacion de dependencias de la libreria Recharts
 import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 
-
-function GraficoBarras({ usuarios, titulo="" }) {
+//Grafico de barras, se pasa usuarios como props, este props viene desde el backend y trae la informacion sobre los usuarios.
+function GraficoBarras({ usuarios}) {
   // Calculamos el valor máximo de cantidad para definir el dominio
   const maxCantidad = Math.max(...usuarios.map(p => p.cantidad));
 
@@ -15,6 +16,7 @@ function GraficoBarras({ usuarios, titulo="" }) {
     ticks.push(i);
   }
 
+  //Se retorna los graficos, en este caso se usan dos datakey, los cuales son el nombre del usuario y la cantidad de mensajes
   return (
     <div>
      

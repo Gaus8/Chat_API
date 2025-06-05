@@ -1,3 +1,4 @@
+//Importacion de dependencias de la libreria Recharts
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 function GraficoPuntos({ mensajes }) {

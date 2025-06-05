@@ -1,8 +1,7 @@
-
+//Importacion de dependencias de la libreria Recharts
 import {BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid} from 'recharts';
 
-import React from 'react';
-
+//Se pasa como props los productos, los cuales se buscan desde el backend
 function GraficosUsuarios ({ productos }) {
   // Calculamos el valor máximo de cantidad para definir el dominio
   const maxCantidad = Math.max(...productos.map(p => p.cantidad));
@@ -10,7 +9,7 @@ function GraficosUsuarios ({ productos }) {
   // Redondeamos hacia arriba al múltiplo de 5 más cercano
   const maxTick = Math.ceil(maxCantidad / 5) * 5;
 
-  // Generamos los ticks de 0 hasta maxTick, de 5 en 5
+  // Generamos los ticks de 0 hasta maxTick, de 5 en 5, este es el intervalo que se muestra en el eje Y
   const ticks = [];
   for (let i = 0; i <= maxTick; i += 5) {
     ticks.push(i);
