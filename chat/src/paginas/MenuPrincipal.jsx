@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 
 function MenuPrincipal() {
 
-
+    const navigate = useNavigate(); 
     const [productos, setProductos] = useState([]); //Estado para los productos, consultados en el backend
     const [mensajes, setMensajes] = useState([]);//Estado para los mensaje, consultados en el backend
     const usuario = Token()//Token para la informacion del usuario
@@ -24,7 +24,7 @@ function MenuPrincipal() {
             await axios.post('http://localhost:3000/api/logout', {}, {
                 withCredentials: true
             });
-            useNavigate("/login"); // 
+            navigate("/login"); // 
         } catch (err) {
             console.error("Error al cerrar sesión:", err);
         }
@@ -34,7 +34,7 @@ function MenuPrincipal() {
     useEffect(() => {
         const consultarProductos = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/api/estadisticas/${usuario.id}/683dac1084b6bf73c7d780b0`)
+                const response = await axios.get(`http://localhost:3000/api/estadisticas/${usuario.id}/68423f0c8a01eb478dcdbb17`)
                 if (response.status === 200) {
                     const productosFormateados = response.data;
                     setProductos(productosFormateados);
