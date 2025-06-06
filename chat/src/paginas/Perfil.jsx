@@ -13,7 +13,7 @@ function Perfil() {
   const [mensaje, setMensaje] = useState(null);
   const [error, setError] = useState(null);
 
-  // Inicializamos con datos actuales
+  // Inicializacion de los datos en caso de haberlos, los cuales son sacados del token
   useEffect(() => {
     if (usuario) {
       setNombre(usuario.nombre || '');
@@ -21,7 +21,7 @@ function Perfil() {
     }
   }, [usuario]);
 
-  // Guardar cambios
+  //Funcion para la actualizacion de los datos del usuario
   const guardarCambios = async () => {
     setMensaje(null);
     setError(null);
@@ -43,6 +43,7 @@ function Perfil() {
     }
   };
 
+//Renderizado de la pagina
   return (
     <div className="perfil-container">
       <h1>Perfil de Usuario</h1>

@@ -1,7 +1,9 @@
 import { FaComments, FaUserCircle, FaSignOutAlt, FaFileUpload, FaQuestionCircle, FaEnvelope } from 'react-icons/fa';
 import '../assets/css/Ayuda.css';
 
+//Pagina con informacion para la ayuda en el chateo entre usuario y empresa
 function Ayuda() {
+    //Renderizado de la pagina
     return (
         <div className="ayuda-container">
             <header className="ayuda-hero">

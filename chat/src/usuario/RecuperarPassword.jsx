@@ -3,13 +3,14 @@ import '../assets/css/RecuperarPassword.css'
 import axios from 'axios';
 
 const RecuperarPassword = () => {
+  //Estados para el control del email, el mensaje y el error
   const [email, setEmail] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
 
+//FUncion para el envio de correo y token para restablecer contraseña
   const manejarEnvio = async (e) => {
     e.preventDefault();
-
     try {
       const response = await axios.post('http://localhost:3000/api/recuperar_password', {
         email,
@@ -24,6 +25,7 @@ const RecuperarPassword = () => {
     }
   };
 
+  //Renderizado de la pagina
   return (
     <div className="recuperar-container">
       <form className="recuperar-form" onSubmit={manejarEnvio}>

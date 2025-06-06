@@ -5,12 +5,12 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 
 function Chat() {
-  const usuario = Token();
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [empresaId, setEmpresaId] = useState('');
-  const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const usuario = Token(); //Datos del usuario recopilados a traves del token
+  const [socket, setSocket] = useState(null);// Estados para la conexion con el socket.io
+  const [messages, setMessages] = useState([]);// Estados para los mensajes del chat
+  const [inputMessage, setInputMessage] = useState('');// Estados para enviar los mensajes 
+  const [empresaId, setEmpresaId] = useState('');//Estados para establecer el id de la empresa
+  const [nombreEmpresa, setNombreEmpresa] = useState(''); //Estados para establecer el nombre de la emepresa
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingMessageContent, setEditingMessageContent] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
@@ -108,12 +108,14 @@ function Chat() {
     };
   }, [socket, usuario, empresaId]);
 
+  //Funcion para editar mensajes
   const handleEdit = (msg) => {
     setEditingMessageId(msg.id);
     setEditingMessageContent(msg.mensaje);
     setShowDeleteConfirm(null);
   };
 
+  //Funcion para enviar texto
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -174,6 +176,7 @@ function Chat() {
     }
   };
 
+ //Funcion para descargar archivos pdf
   const downloadFile = (fileData, fileName, fileType) => {
     const link = document.createElement('a');
     link.href = fileData;
@@ -183,6 +186,7 @@ function Chat() {
     link.click();
     document.body.removeChild(link);
   };
+ //Funcion para mostrar el tamaño de un archivo pdf
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -192,9 +196,7 @@ function Chat() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-
-  ///
-
+  //Funcion para guardar la edicion de un mensaje, se hace un llamado al backend con un PATCH, para actualizar el mensaje.
   const saveEdit = async (msgId) => {
     try {
       await axios.patch(`http://localhost:3000/api/mensajes/${msgId}`, {
@@ -214,12 +216,13 @@ function Chat() {
 
 
   };
-
+//Funcion para cancelar la edicion, se desactiva el menu desplegable
   const cancelEdit = () => {
     setEditingMessageId(null);
     setEditingMessageContent('');
   };
 
+  //Funcion para eliminar un mensaje, se hace llamado al backend con un DELETE.
   const handleDelete = async (msgId) => {
     try {
       await axios.delete(`http://localhost:3000/api/mensajes/${msgId}`);
@@ -234,6 +237,8 @@ function Chat() {
     setShowDeleteConfirm(showDeleteConfirm === msgId ? null : msgId);
     setEditingMessageId(null);
   };
+
+  //Renderizado de la pagina
   return (
     <>
       <div className="chat-header">

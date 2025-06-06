@@ -176,70 +176,84 @@ function ChatEmpresa() {
     setNewChatModal(false);
     setEditingMessageId(null);
     setShowDeleteConfirm(null);
+
   }
 
   //Funcion para el envio de mensajes
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!inputMessage.trim() && !selectedFile) {
-      alert('Debes escribir un mensaje o seleccionar un archivo');
-      return;
-    }
+  if (!inputMessage.trim() && !selectedFile) {
+    alert('Debes escribir un mensaje o seleccionar un archivo');
+    return;
+  }
 
-    //Mensaje base, sin documento
-    if (!socket || !selectedClient) return;
-    setIsSending(true);
-    try {
-      const baseMessage = {
-        remitente: usuario.id,
-        destinatario: selectedClient.id,
-        mensaje: inputMessage,
-        timestamp: new Date().toISOString(),
-      };
-    //Mensaje con documento (pdf)
-      if (selectedFile) {
-        if (selectedFile.size > 5 * 1024 * 1024) {
-          alert('El archivo es demasiado grande (máximo 5MB)');
-          return;
-        }
+  if (!socket || !selectedClient) return;
+  
+  setIsSending(true);
+  
+  try {
+    // Crear mensaje con ID temporal
+    const tempId = `temp-${Date.now()}`;
+    const baseMessage = {
+      remitente: usuario.id,
+      destinatario: selectedClient.id,
+      mensaje: inputMessage,
+      timestamp: new Date().toISOString(),
+      tempId: tempId, // ID temporal
+      isOwn: true // Lo marcamos como propio desde el inicio
+    };
 
-        const fileData = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(selectedFile);
-        });
+    // Agregar a los mensajes inmediatamente (optimistic update)
+    setMessages(prev => [...prev, baseMessage]);
 
-        const messageWithFile = {
-          ...baseMessage,
-          archivo: {
-            datos: fileData,
-            tipo: selectedFile.type,
-            nombre: selectedFile.name,
-            tamaño: selectedFile.size,
-          }
-        };
-
-        socket.emit('new chat', messageWithFile);
-        setMessages(prev => [...prev, { ...messageWithFile, isOwn: true }]);
-      } else {
-        socket.emit('new chat', baseMessage);
-        setMessages(prev => [...prev, { ...baseMessage, isOwn: true }]);
+    if (selectedFile) {
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        alert('El archivo es demasiado grande (máximo 5MB)');
+        return;
       }
 
-      setInputMessage('');
-      setSelectedFile(null);
-      document.querySelector('.file-input').value = '';
-    } catch (error) {
-      console.error('Error al enviar mensaje:', error);
-      alert('Error al enviar el archivo');
-    } finally {
-      setIsSending(false);
-    }
-    consultarNuevosMensajes();
-  };
+      const fileData = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
 
+      const messageWithFile = {
+        ...baseMessage,
+        archivo: {
+          datos: fileData,
+          tipo: selectedFile.type,
+          nombre: selectedFile.name,
+          tamaño: selectedFile.size,
+        }
+      };
+
+      socket.emit('new chat', messageWithFile);
+    } else {
+      socket.emit('new chat', baseMessage);
+    }
+
+    setInputMessage('');
+    setSelectedFile(null);
+    document.querySelector('.file-input').value = '';
+
+    // Hacer refresh después de un pequeño delay (1 segundo)
+    setTimeout(() => {
+      consultarNuevosMensajes();
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error al enviar mensaje:', error);
+    alert('Error al enviar el mensaje');
+    
+    // Si hay error, removemos el mensaje temporal
+    setMessages(prev => prev.filter(msg => msg.tempId !== tempId));
+  } finally {
+    setIsSending(false);
+  }
+};
   //Funcion para descargar archivos pdf
   const downloadFile = (fileData, fileName, fileType) => {
     const link = document.createElement('a');
@@ -250,8 +264,8 @@ function ChatEmpresa() {
     link.click();
     document.body.removeChild(link);
   };
+  //Funcion para mostrar el tamaño de un archivo pdf
 
-  // Funcion para mostrar el tamaño especifico del documento pdf
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
