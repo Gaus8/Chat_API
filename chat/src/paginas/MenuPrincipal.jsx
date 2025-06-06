@@ -114,7 +114,7 @@ function MenuPrincipal() {
                     <GraficosUsuarios productos={productos} />
                 </div>
                 <div>
-                    <h3 className='titulos-graficos'>Pedido de Productos</h3>
+                    <h3 className='titulos-graficos'>Mensasjes Enviados Diariamente</h3>
                     <GraficoPuntos mensajes={mensajes} />
                 </div>
             </div>
