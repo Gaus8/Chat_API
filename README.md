@@ -1,9 +1,3 @@
-
-# Project Title
-
-A brief description of what this project does and who it's for
-
-
 # Chat API
 
 **Chat API** es una API robusta que permite integrar funcionalidades de chat en tiempo real en aplicaciones web, móviles o de escritorio.
